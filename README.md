@@ -206,7 +206,7 @@ Let's try using atoms now. We can print an atom or a list using `print`, and we 
    (1 2 3)
    %
 ```
-Let's look at how `car` and `cdr` functions work. `car` takes the head (first element) of a list, and `cdr` takes the tail (everything _except_ the first element) of a list:
+Let's look at how `car` and `cdr` work. `car` takes the head (first element) of a list, and `cdr` takes the tail (everything _except_ the first element) of a list:
 ```
    % (define list '(1 2 3))
    ..........................|..
