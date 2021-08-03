@@ -249,7 +249,7 @@ If you need a lot of `if`s in one place, you can consider using `cond`. It takes
    ..............|.....................
    0
 ```
-The final builtin function is `let'. It allows us to bind names to expressions (so that they're not re-evaluated at a later time). For example:
+The final builtin function is `let`. It allows us to bind names to expressions (so that they're not re-evaluated at a later time). For example:
 ```
    % (let (x 5 y 6) (+ x y))
    .............................................|.............
