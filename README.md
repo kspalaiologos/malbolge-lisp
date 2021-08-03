@@ -273,24 +273,17 @@ Quicksort (@La Condizione)
 (defun insertsort (l) (if (= null l) null (insert (car l) (insertsort (cdr l)))))
 (insertsort '(6 8 1 0 6 8 2))
 ```
-And a bunch of programs I wrote myself.
-Counter
+And a bunch of programs I wrote myself - a counter, power function, factorial function and the maximum of a list.
 ```
 (defun counter (x) (cond ((< x 10) (counter (print (+ 1 x)))) (print ok)))
 (counter 1)
-```
-Power
-```
+
 (defun power (x y) (if (= y 0) 1 (* x (power x (- y 1)))))
 (power 3 5)
-```
-Factorials
-```
+
 (defun fac (n) (if (= n 0) 1 (* n (fac (- n 1)))))
 (fac 6)
-```
-Maximum of a list
-```
+
 (defun max (l) (if (= null l) 0 (let (m (max (cdr l))) (if (> (car l) m) (car l) m))))
 (max '(2 5 1 9 10))
 ```
