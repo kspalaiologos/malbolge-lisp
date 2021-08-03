@@ -216,7 +216,7 @@ Let's look at how `car` and `cdr` functions work. `car` takes the head (first el
    .............|....
    (2 3)
 ```
-Finally, `cons` can be used to prepend someting to a list. Like so:
+Finally, `cons` can be used to prepend something to a list. Like so:
 ```
    % (cons 3 '(1 2))
    .....................|.....
