@@ -24,7 +24,7 @@ MalbolgeLisp uses a special variant of Malbolge called **Malbolge Unshackled**. 
 4) if the rotation width is unknown then you can't load values larger than 3^4-1, except values starting with a `1` trit
 5) to overcome this you need a loop that probes the rotation width which is probably beyond most people's comprehension
 6) the specification says that the value `0t21` should be used to print a newline, but this value is _theoretically_ impossible to obtain without having read an end of line or end of file from I/O before.
-7) Malbolge Unshackled is actually usable because it's (as this project proves) Turing complete. The default Malbolge rotation width (10) constrains the addressable memory enough to make something cool with it.
+7) Malbolge Unshackled is actually usable because it's (as this project proves) Turing complete. The default Malbolge rotation width (10) constraints the addressable memory enough to make something cool with it.
 
 A few example Malbolge programs:
 
