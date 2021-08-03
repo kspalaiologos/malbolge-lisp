@@ -4,11 +4,11 @@ Made by Palaiologos, 2020 - 2021. Released to the public domain.
 
 ## What is MalbolgeLisp?
 
-**MalbolgeLisp** is a LISP interpreter written in Malbolge. It's as of 2020 and now 2021, [the most advanced, usable Malbolge program ever created](https://en.wikipedia.org/wiki/Malbolge#Programming_in_Malbolge). It supports everything LISPs generally tend to support (like `cond`, `let`, `lambda`, etc...). The v1.1 release greatly improved the performance and reduced the code size, while adding a few features.
+**MalbolgeLisp** is a LISP interpreter written in Malbolge. It's as of 2020 and 2021, [the most advanced, usable Malbolge program ever created](https://en.wikipedia.org/wiki/Malbolge#Programming_in_Malbolge). It supports everything LISPs generally tend to support (like `cond`, `let`, `lambda`, etc...). The v1.1 release greatly improved the performance and reduced the code size, while adding a few features.
 
 ## What is Malbolge? Why is it difficult?
 
-**Malbolge** is a public domain esoteric programming language. It was specifically designed to be almost impossible to use, via a counter-intuitive 'crazy operation', trinary arithmetic, and self-modifying code. It builds on the difficulty of earlier, challenging esoteric languages like Brainfuck, but takes this aspect to the extreme. Despite this design, it is possible to write useful Malbolge programs as we are going to find out.
+**Malbolge** is a public domain esoteric programming language. It was specifically designed to be almost impossible to use, via a counter-intuitive 'crazy operation', trinary arithmetic, and self-modifying code. It builds on the difficulty of earlier, challenging esoteric languages like Brainfuck, but takes this aspect to the extreme. Despite this design, it is possible to write useful Malbolge programs (as this project proves).
 
 What Malbolge instructions do depends on their position in the source code. After being ran, they are encrypted (so to make a loop, one has to decrypt it after each iteration - sounds hard already?). This is how so-called instruction cycles have been invented - it has been observed that some instructions on certain locations form looping cycles, which is the basis of Malbolge programming.
 
