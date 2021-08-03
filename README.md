@@ -77,6 +77,8 @@ The interpreter supports the following features that will be discussed in this R
    iota size nth
 ```
 
+**MalbolgeLisp** is fairly slow. If you want to test programs in a mostly compatible environment to MalbolgeLisp, try [x86Lisp](https://github.com/kspalaiologos/x86lisp) - a Lisp interpreter based on the MalbolgeLisp dialect that I wrote, squashed into a 2.1KB `.exe` file.
+
 ## Arithmetic on numbers
 
 A few examples of performing arithmetic in MalbolgeLisp are presented below. Note: Signed integers aren't supported.
