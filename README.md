@@ -77,7 +77,7 @@ The interpreter supports the following features that will be discussed in this R
    iota size nth
 ```
 
-**MalbolgeLisp** is fairly slow. If you want to test programs in a faster, mostly compatible environment to MalbolgeLisp, try [x86Lisp](https://github.com/kspalaiologos/x86lisp) - a Lisp interpreter based on the this dialect, squashed into a 2.1KB Windows `.exe` file.
+**MalbolgeLisp** is fairly slow. If you want to test programs in a faster, mostly compatible environment to MalbolgeLisp, try [x86Lisp](https://github.com/kspalaiologos/x86lisp) - a Lisp interpreter based on this dialect, squashed into a 2.1KB Windows `.exe` file.
 
 ## Arithmetic on numbers
 
