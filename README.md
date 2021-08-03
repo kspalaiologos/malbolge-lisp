@@ -77,7 +77,7 @@ The interpreter supports the following features that will be discussed in this R
    iota size nth
 ```
 
-**MalbolgeLisp** is fairly slow. If you want to test programs in a mostly compatible environment to MalbolgeLisp, try [x86Lisp](https://github.com/kspalaiologos/x86lisp) - a Lisp interpreter based on the MalbolgeLisp dialect that I wrote, squashed into a 2.1KB `.exe` file.
+**MalbolgeLisp** is fairly slow. If you want to test programs in a mostly compatible environment to MalbolgeLisp, try [x86Lisp](https://github.com/kspalaiologos/x86lisp) - a Lisp interpreter based on the this dialect, squashed into a 2.1KB `.exe` file.
 
 ## Arithmetic on numbers
 
@@ -261,7 +261,7 @@ The final builtin function is `let`. It allows us to bind names to expressions (
 ```
 ## Example programs
 
-Quicksort (@La Condizione; yes, they know that this is a real quicksort)
+Quicksort (@La Condizione; yes, they know that this is not a real quicksort)
 ```
 (defun filter (f l) (cond ((= l null) null) ((f (car l)) (cons (car l) (filter f (cdr l)))) (1 (filter f (cdr l)))))
 (defun append (a b) (if (= null a) b (cons (car a) (append (cdr a) b) )))
