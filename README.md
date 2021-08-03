@@ -24,6 +24,19 @@ MalbolgeLisp uses a special variant of Malbolge called **Malbolge Unshackled**. 
 6) the specification says that the value `0t21` should be used to print a newline, but this value is _theoretically_ impossible to obtain without having read an end of line or end of file from I/O before.
 7) Malbolge Unshackled is actually usable because it's (as this project proves) Turing complete. The default Malbolge rotation width (10) constrains the addressable memory enough to make something cool with it.
 
+A few example Malbolge programs:
+
+A "Hello World" program:
+```
+(=<`#9]~6ZY327Uv4-QsqpMn&+Ij"'E%e{Ab~w=_:]Kw%o44Uqp0/Q?xNvL:`H%c#DD2^WV>gY;dts76qKJImZkj
+```
+
+A cat program that doesn't terminate on EOF:
+
+```
+(=BA#9"=<;:3y7x54-21q/p-,+*)"!h%B0/.~P<<:(8&66#"!~}|{zyxwvugJk
+```
+
 ## What is inside the zip file?
 
 The release bundle includes interpreter binaries for Windows (x64, one is optimized for memory consumption and one for speed), and a few interpreters for Linux (the names should be self explanatory, also x64). If you're not running a x64 machine, you'll have to compile `fast20.c` yourself. From my observations, the best results were yielded by GCC and the code has been tuned to perform well when compiled with it. `malbolgelisp-v1.1.mb` is the source code for the interpreter.
