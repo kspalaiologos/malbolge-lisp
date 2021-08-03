@@ -259,7 +259,7 @@ The final builtin function is `let`. It allows us to bind names to expressions (
 ```
 ## Example programs
 
-Quicksort (@La Condizione)
+Quicksort (@La Condizione; yes, they know that this is a real quicksort)
 ```
 (defun filter (f l) (cond ((= l null) null) ((f (car l)) (cons (car l) (filter f (cdr l)))) (1 (filter f (cdr l)))))
 (defun append (a b) (if (= null a) b (cons (car a) (append (cdr a) b) )))
