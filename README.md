@@ -154,7 +154,7 @@ Because `define lambda` is a bit annoying to type each time and doesn't look goo
    3
 ```
 ## Operations on lists and atoms
-The equals function (`=`) also works on atoms and lists. Although, you can't just introduce a list in your code, since an attempt of evaluating it would be made by the interpreter. For this reason, you have to use quoting, like so:
+The equals function (`=`) also works on atoms and lists. List have to be quoted to prevent the interpreter from evaluating it:
 ```
    % (= test test)
    ..................|......
