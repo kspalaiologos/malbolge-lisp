@@ -122,7 +122,7 @@ In MalbolgeLISP, you can introduce constants using the `define` function. For ex
    ................|.....
    6
 ```
-MalbolgeLISP also supports lexically scoped (a function sees it's lexical ancestor's environment, not it's callers) lambdas. For instance:
+MalbolgeLISP also supports lexically scoped (a function sees its lexical ancestor's environment, not its callers) lambdas. For instance:
 ```
    % ((lambda (n) (* n n)) 3)
    ........................................|.........
