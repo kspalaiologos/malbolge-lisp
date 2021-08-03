@@ -64,7 +64,7 @@ The interpreter supports the following features that will be discussed in this R
 
 ## Arithmetics on numbers
 
-A few examples of performing arithmetics in MalbolgeLisp are presented below. Note: Signed arithmetics aren't supported.
+A few examples of performing arithmetic in MalbolgeLisp are presented below. Note: Signed integers aren't supported.
 ```
    % (+ 2 -1)
    ..............|.....
