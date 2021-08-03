@@ -228,7 +228,7 @@ Finally, `cons` can be used to prepend something to a list. Like so:
 ```
 ## `if`, `cond` and `let`
 
-The `if` function requires exactly 3 parameters - the condition, expression to evaluate if the condition is true, and the expression to evaluate if the condition is false. A small example:
+The `if` function requires exactly 3 parameters - the condition, the expression to evaluate if the condition is true, and the expression to evaluate if the condition is false. A small example:
 ```
    % (defun gt10 (x) (if (> x 10) (print yes) (print no)))
    .......................................................................|.
