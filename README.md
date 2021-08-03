@@ -2,6 +2,8 @@
 # MalbolgeLisp v1.1
 Made by Palaiologos, 2020 - 2021. Released to the public domain.
 
+![Session gif](https://github.com/kspalaiologos/malbolge-lisp/raw/master/session.gif)
+
 ## What is MalbolgeLisp?
 
 **MalbolgeLisp** is a LISP interpreter written in Malbolge. It's as of 2020 and 2021, [the most advanced, usable Malbolge program ever created](https://en.wikipedia.org/wiki/Malbolge#Programming_in_Malbolge). It supports everything LISPs generally tend to support (like `cond`, `let`, `lambda`, etc...). The v1.1 release greatly improved the performance and reduced the code size, while adding a few features.
