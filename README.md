@@ -75,7 +75,7 @@ The interpreter supports the following features that will be discussed in this R
    iota size nth
 ```
 
-## Arithmetics on numbers
+## Arithmetic on numbers
 
 A few examples of performing arithmetic in MalbolgeLisp are presented below. Note: Signed integers aren't supported.
 ```
@@ -140,7 +140,7 @@ How to define functions then? Well, a logical conclusion can be drawn from the e
    ...........|.........
    3
 ```
-Because `define lambda` is a bit annoying to type each time and doesn't look all that well, we can use a nicer syntax for that - `defun`:
+Because `define lambda` is a bit annoying to type each time and doesn't look good, we can use a nicer syntax for that - `defun`:
 ```
    % (defun succ (x) (+ x 1))
    .....................................|.
