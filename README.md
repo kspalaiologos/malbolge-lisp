@@ -1,12 +1,43 @@
 
-# MalbolgeLisp v1.1
+# MalbolgeLISP v1.2
 Made by Palaiologos, 2020 - 2021. Released to the public domain.
 
 ![Session gif](https://github.com/kspalaiologos/malbolge-lisp/raw/master/session.gif)
 
+**[During summer and fall of 2021, I wrote a book about MalbolgeLISP's design and implementation](https://github.com/kspalaiologos/malbolge-lisp/raw/master/MalbolgeLisp.pdf)**
+
 ## What is MalbolgeLisp?
 
-**MalbolgeLisp** is a LISP interpreter written in Malbolge. It's as of 2020 and 2021, [the most advanced, usable Malbolge program ever created](https://en.wikipedia.org/wiki/Malbolge#Programming_in_Malbolge). It supports everything LISPs generally tend to support (like `cond`, `let`, `lambda`, etc...). The v1.1 release greatly improved the performance and reduced the code size, while adding a few features.
+**MalbolgeLisp** is a LISP interpreter written in Malbolge. It's as of 2020 and 2021, [the most advanced, usable Malbolge program ever created](https://en.wikipedia.org/wiki/Malbolge#Programming_in_Malbolge). It supports everything LISPs generally tend to support (like `cond`, `let`, `lambda`, etc...). The v1.2 release greatly improved the performance and reduced the code size, while adding a few features.
+
+**MalbolgeLISP** supports tacit programming, partial application, de Bruijn indices, monad lifting, and more.
+
+A few fibonacci functions programmed in MalbolgeLISP (and tested on `(fibN 6)`):
+
+```lisp
+; Naive attempt at 1m 19s
+(defun fib1 (n) (
+    if [n < 2]
+        n
+        [(fib1 [n - 1]) + (fib1 [n - 2])]))
+
+; Direct port of accumulator-keeping solution at 1m 6s:
+(defun fib2 (n) ((lambda (a w) (
+    if [w = 0]
+        (#0 a)
+        ((bruijn 0) (tie (#1 a) (lift + a)) [w - 1]))) '(0 1) n))
+
+; A more idiomatic solution than the above at 54s:
+(defun fib3 (n) ((lambda (x y w) (
+    if [w = 0]
+        x
+        ((bruijn 0) y [x + y] [w - 1]))) 0 1 n))
+
+; Iterative attempt at 43s
+(defun fib4 (n) (#0 (
+    iterateN n (lambda (x) (
+        tie (#1 x) [(#0 x) + (#1 x)])) '(0 1))))
+```
 
 ## What is Malbolge? Why is it difficult?
 
@@ -39,257 +70,6 @@ A cat program that doesn't terminate on EOF:
 (=BA#9"=<;:3y7x54-21q/p-,+*)"!h%B0/.~P<<:(8&66#"!~}|{zyxwvugJk
 ```
 
-## What is inside the zip file?
+## How to use
 
-The release bundle includes interpreter binaries for Windows (x64, one is optimized for memory consumption and one for speed), and a few interpreters for Linux (the names should be self explanatory, also x64). If you're not running a x64 machine, you'll have to compile `fast20.c` yourself. From my observations, the best results were yielded by GCC and the code has been tuned to perform well when compiled with it. `malbolgelisp-v1.1.mb` is the source code for the interpreter.
-
-## How to use MalbolgeLisp?
-
-Pass the Lisp interpreter source code (`malbolgelisp-v1.1.mb`) as an argument to `fast20`.
-
-## Using the REPL
-
-After you start the interpreter, you should be greeted with a banner (containing the version, dot commands, etc..). The following dot commands are currently available:
-  - `.F` - display all the features recognized by the interpreter
-  - `.A` - display the information about the interpreter's author
-  - `.R` - reset the memory
-  - `.M` - display the information about memory consumption
-  -  Any other command (and sending EOF - ^Z on Windows, ^D on UNIXes
-     will terminate the interpreter).
-
-After entering an expression (for example - `(+ 2 2)`), the interpreter should print something akin to this:
-```
-   % (+ 2 2)
-   ..............|.....
-   4
-   %
-```
-The dots are used to signal that the code is being parsed (before the pipe character) or evaluated (after the pipe character). The amount of dots doesn't correspond to any consistent amount of time.
-
-## The language
-The interpreter supports the following features that will be discussed in this README:
-```
-   MALBOLGELISP V1.1 (2020-2021, PALAIOLOGOS)
-   DOT COMMANDS:  .F(eatures)  .A(uthor)  .R(eset)  .M(emory)
-   % .F
-   ' + - < > = ! & | * / define defun lambda
-   cond print atom cons car cdr if let
-   iota size nth
-```
-
-**MalbolgeLisp** is fairly slow. If you want to test programs in a faster, mostly compatible environment to MalbolgeLisp, try [x86Lisp](https://github.com/kspalaiologos/x86lisp) - a Lisp interpreter based on this dialect, squashed into a 2.1KB Windows `.exe` file.
-
-## Arithmetic on numbers
-
-A few examples of performing arithmetic in MalbolgeLisp are presented below. Note: Signed integers aren't supported.
-```
-   % (+ 2 -1)
-   ..............|.....
-   1
-   % (* 3 3)
-   ..............|.....
-   9
-   % (% 5 2)
-   ..............|.....
-   1
-   % (> 5 6)
-   ..............|.....
-   0
-   % (< 5 6)
-   ..............|.....
-   1
-   % (= 6 6)
-   ..............|......
-   1
-   % (! (= 6 7))
-   ......................|.........
-   1
-   % (/ 25 5)
-   ..............|.....
-   5
-   % (- 4 3)
-   ..............|.....
-   1
-   % (& (= 2 2) (= 3 3))
-   ....................................|...............
-   1
-```
-There is no `>=` or `<=`, it has to be implemented by negating respectively `<` and `>`. A single `&` and `|` are respectively logical AND and OR.
-
-## `define`, `defun` and `lambda`.
-In MalbolgeLISP, you can introduce constants using the `define` function. For example:
-```
-   % (define x 5)
-   ................|..
-   5
-   % (+ x 1)
-   ................|.....
-   6
-```
-MalbolgeLISP also supports lexically scoped (a function sees its lexical ancestor's environment, not its callers) lambdas. For instance:
-```
-   % ((lambda (n) (* n n)) 3)
-   ........................................|.........
-   9
-   % ((lambda (m) ((lambda (n) (+ m n)) 2)) 2)
-   ........................................................|.............
-   4
-```
-How to define functions then? Well, a logical conclusion can be drawn from the examples above:
-```
-   % (define succ (lambda (x) (+ x 1)))
-   .............................................|..
-   (lambda (x) (+ x 1))
-   % (succ 2)
-   ...........|.........
-   3
-```
-Because `define lambda` is a bit annoying to type each time and doesn't look good, we can use a nicer syntax for that - `defun`:
-```
-   % (defun succ (x) (+ x 1))
-   .....................................|.
-   (lambda (x) (+ x 1))
-   % (succ 2)
-   ...........|.........
-   3
-```
-## Operations on lists and atoms
-The equals function (`=`) also works on atoms and lists. Lists have to be quoted to prevent the interpreter from evaluating them:
-```
-   % (= test test)
-   ..................|......
-   1
-   % (= '(1 2 3) '(1 2 3))
-   ..................................|.........
-   1
-   %
-```
-The `iota` function generates natural numbers from `0` to `N-1` (inclusive). For instance:
-```
-   % (iota 5)
-   ...........|....
-   (0 1 2 3 4)
-```
-`size` yields the size of a list passed as an argument. Using `size` and `iota`, we can make a really inefficient identity function for numbers:
-```
-   % (defun id (x) (size (iota x)))
-   ..........................................|.
-   (lambda (x) (size (iota x)))
-   % (id 6)
-   ...........|...........
-   6
-   % .M
-   233B USED
-   % # That's a lot of memory wasted!
-```
-`nth` yields the N-th element of a list. It uses the same indexing as `iota`, as demonstrated below:
-```
-   % (nth 3 (iota 5))
-   ......................|........
-   3
-```
-Let's try using atoms now. We can print an atom or a list using `print`, and we can check if something is an atom using the `atom` function. Note that `print` is an identity function with a side effect of printing an expression's value:
-```
-   % (atom null)
-   ...........|....
-   1
-   % (atom '(1 2 3))
-   .....................|....
-   0
-   % (print hello)
-   .............|....
-   hello
-
-   hello
-   % (print '(1 2 3))
-   .....................|....
-   (1 2 3)
-
-   (1 2 3)
-   %
-```
-Let's look at how `car` and `cdr` work. `car` takes the head (first element) of a list, and `cdr` takes the tail (everything _except_ the first element) of a list:
-```
-   % (define list '(1 2 3))
-   ..........................|..
-   (1 2 3)
-   % (car list)
-   .............|....
-   1
-   % (cdr list)
-   .............|....
-   (2 3)
-```
-Finally, `cons` can be used to prepend something to a list. Like so:
-```
-   % (cons 3 '(1 2))
-   .....................|.....
-   (3 1 2)
-```
-## `if`, `cond` and `let`
-
-The `if` function requires exactly 3 parameters - the condition, the expression to evaluate if the condition is true, and the expression to evaluate if the condition is false. A small example:
-```
-   % (defun gt10 (x) (if (> x 10) (print yes) (print no)))
-   .......................................................................|.
-   (lambda (x) (if (> x 10) (print yes) (print no)))
-   % (gt10 5)
-   ...........|...............
-   no
-
-   no
-   % (gt10 16)
-   ...........|...............
-   yes
-
-   yes
-```
-If you need a lot of `if`s in one place, you can consider using `cond`. It takes a list of lists `(condition result)`, optionally including a `(result)` list. Using `cond`, we can make a three-way-comparison function (that returns `2 1 0` for `> = <`):
-```
-   % (defun <=> (x y) (cond ((> x y) 2) ((< x y) 0) (1)))
-   ....................................................................................|.
-   (lambda (x y) (cond ((> x y) 2) ((< x y) 0) (1)))
-   % (<=> 5 6)
-   ..............|.....................
-   0
-```
-The final builtin function is `let`. It allows us to bind names to expressions (so that they're not re-evaluated at a later time). For example:
-```
-   % (let (x 5 y 6) (+ x y))
-   .............................................|.............
-   11
-```
-## Example programs
-
-Quicksort (@La Condizione; yes, they know that this is not a real quicksort)
-```
-(defun filter (f l) (cond ((= l null) null) ((f (car l)) (cons (car l) (filter f (cdr l)))) (1 (filter f (cdr l)))))
-(defun append (a b) (if (= null a) b (cons (car a) (append (cdr a) b) )))
-(defun append3 (a b c) (append a (append b c)))
-(defun list>= (m list) (filter (lambda (n) (! (< n m))) list))
-(defun list< (m list) (filter (lambda (n) (< n m)) list))
-(defun qsort (l) (if (= null l) null (append3 (qsort (list< (car l) (cdr l))) (cons (car l) null) (qsort (list>= (car l) (cdr l))))))
-(qsort '(6 8 1 0 6 8 2))
-```
-"Dumb" sort (@umnikos)
-```
-(defun insert (i l) (if (= null l) (cons i l) (if (> i (car l)) (cons (car l) (insert i (cdr l))) (cons i l))))
-(defun insertsort (l) (if (= null l) null (insert (car l) (insertsort (cdr l)))))
-(insertsort '(6 8 1 0 6 8 2))
-```
-And a bunch of programs I wrote myself - a counter, power function, factorial function and the maximum of a list.
-```
-(defun counter (x) (cond ((< x 10) (counter (print (+ 1 x)))) (print ok)))
-(counter 1)
-
-(defun power (x y) (if (= y 0) 1 (* x (power x (- y 1)))))
-(power 3 5)
-
-(defun fac (n) (if (= n 0) 1 (* n (fac (- n 1)))))
-(fac 6)
-
-(defun max (l) (if (= null l) 0 (let (m (max (cdr l))) (if (> (car l) m) (car l) m))))
-(max '(2 5 1 9 10))
-```
-
-Do you want _your_ code featured? Please open a pull request.
+Download and compile `fast20.c` using `clang` with `-O3 -march=native`. Unpack `lisp.zip` and run `./fast20 lisp.mb`.
