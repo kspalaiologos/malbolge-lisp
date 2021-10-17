@@ -1,0 +1,32 @@
+
+\chapter*{Glossary}
+\addcontentsline{toc}{chapter}{Glossary}
+
+\par In this book, the following assumptions are made:
+
+\begin{itemize}
+    \item \verb|*X| is the value \textit{pointed} by \verb|X| - for instance, if the 3rd word of memory is \verb|152| and \verb|X| is \verb|3|, then \verb|*X| is \verb|152|.
+    \item \verb|X[Y]| is equivalent to \verb|*(X + Y)|. Because addition is commutative, \verb|X[Y]| is equivalent to \verb|Y[X]|.
+    \item \textit{Folding} a list \verb|⍵| with a function \verb|⍺⍺| is equivalent to putting \verb|⍺⍺| between every element of \verb|⍵|, also given the identity element of \verb|⍺⍺|. One could assume binding to the left (\verb|(⍵[1] ⍺⍺ ⍵[2]) ⍺⍺ ⍵[3]|), or to the right (\verb|⍵[1] ⍺⍺ (⍵[2] ⍺⍺ ⍵[3])|), hence the names \textit{fold-right} and \textit{fold-left}. Unlike reduction, the result of \textit{folding} an empty array is defined and equal to the identity element.
+    \item \textit{Scanning} a list \verb|⍵| with a function \verb|⍺⍺| is equivalent to mapping a fold over prefixes of a list. This definition of a scan has a $O(n^2)$ complexity regardless of the fold type. A more efficient, $O(n)$ definition of a \textit{scan-left} exists (fold with intermediate steps).
+    \item \textit{Outer product} of function \verb|⍺⍺| (\verb|∘.⍺⍺|) and arrays \verb|⍺| and \verb|⍵| is the application of \verb|⍺⍺| between every pair of elements from \verb|⍺| and \verb|⍵|. The resulting list has a depth given by \verb|⍴,⍥⍴|.
+    \item \textit{Inner product} of functions \verb|⍺⍺|, \verb|⍵⍵| and lists \verb|⍺| and \verb|⍵| (\verb|⍺⍺.⍵⍵|) is equivalent to folding the list obtained by putting \verb|⍵⍵| between corresponding pairs of \verb|⍺| and \verb|⍵| with \verb|⍺⍺|.
+    \item A \textit{higher-order function} is a function that takes another function as its argument.
+    \item A \textit{lambda expression} (in the context of MalbolgeLISP) is an anonymous function with static (lexical) scoping, meaning that it can see all the variables bound by its lexical ancestor, unlike to dynamic scoping implemented by older LISPs where a function can see all the variables bound by its caller(s). In both cases, the first bound variable found is used, allowing to shadow variables.
+    \item A \textit{dyad} is a two argument function.
+    \item A \textit{monad} is generally a single argument function. The book also uses it in a context of an abstract data constructor implementing the \textit{bind} and \textit{unit} functions.
+    \item \textit{Replicating} a list \verb|⍵| according to list \verb|⍺| is copying each element of \verb|⍵| a given number of times (specified by the corresponding element of \verb|⍺| or assumed to be zero). In MalbolgeLISP, \verb|⍺| can be a scalar, in which case the contents of \verb|⍵| are catenated to each other \verb|⍺| times. If \verb|⍵| is also a scalar, it's repeated \verb|⍺| times to form a list.
+    \item \textit{Filtering} a list \verb|⍵| with function \verb|⍺⍺| is equivalent to mapping \verb|⍺⍺| on every element of \verb|⍵| (assuming \verb|⍺⍺| returns a boolean value, i.e. \verb|0| or \verb|1|), and replicating \verb|⍵| with the result of the mapping (\verb|⍵/⍨⍺⍺¨⍵|).
+    \item \textit{Rotating} a list \verb|⍵| by \verb|⍺| elements is equivalent to dropping \verb|⍺| elements from \verb|⍵|, and joining them with \verb|⍵| (dyadic \verb|⌽|, or more illustratively, \verb|(↓,↑)|).
+    \item \textit{Zipping} two arrays is the act of forming a list of pairs via the juxtaposition of corresponding elements from the given arrays. Alternatively, the pairs can be processed by a functor (\textit{zipwith}).
+    \item \textit{Flattening} a list if the act of decreasing the list's depth by one level, enlisting all of the elements from the topmost sublists into a resultant list.
+    \item \textit{Mapping} a function \verb|⍺⍺| over a list \verb|⍵| is the act of processing each element of \verb|⍵| with the function \verb|⍺⍺| to produce a resultant list of equivalent length.
+    \item \textit{Partial application} is defined as fixing a number of arguments to a function, yielding an anonymous function of smaller arity.
+    \item \textit{Iteration} of a function over an argument is defined as evaluating the function over its result starting with the initial argument until a condition is satisfied. Sometimes the condition is numeric (\verb|iterateN| MalbolgeLISP word), or is defined as a dyadic function between the previous and current result (just \verb|iterate|). A fixed point combinator could be implemented using partial application of deep equality (MalbolgeLISP: \verb|bind iterate =|, APL: \verb|⍣≡|). Iteration is faster and consumes less resources than recursion, assuming no tail call optimisation.
+    \item \textit{Function composition} (or \verb|atop|, as MalbolgeLISP calls it) is taking an arbitrary amount of functions where each function operates on the results of the function before, except the last function, which gets all the arguments passed to the anonymous function yielded by composition - in MalbolgeLISP, \verb|((atop f g h) a b c)| $\iff$ \verb|(f (g (h a b c)))|.
+    \item \textit{Selfie} is a higher order function that duplicates the argument to the function it takes (i.e. \verb|(bind selfie *)|, equivalent to \verb|×⍨|, computes the square of its argument).
+    \item \textit{Commute} swaps the order of two arguments to a function. \verb|⍺ f ⍵| $\iff$ \verb|⍵ f⍨ ⍺|.
+    \item \verb=CON0= is a 10-trit number containing only zeroes.
+    \item \verb=CON1= is a 10-trit number containing only ones.
+    \item \verb=CON2= is a 10-trit number containing only twos.
+\end{itemize}

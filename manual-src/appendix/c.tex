@@ -1,0 +1,45 @@
+
+\chapter*{Appendix D - Reimplementation of sorting}
+\addcontentsline{toc}{chapter}{Appendix D}
+
+\par The following sorting functions that operate on numbers have been suggested\footnote{by Matt8898 and Umnikos; Matt8898 have admitted themselves that the "quicksort" implementation doesn't implement a quicksort} as demonstration programs for MalbolgeLISP v1.1:
+
+\begin{minted}{lisp}
+(defun filter (f l) (cond
+    ((= l null) null)
+    ((f (car l)) (cons (car l) (filter f (cdr l))))
+    (1 (filter f (cdr l)))))
+
+(defun append (a b) (if (= null a) b (cons (car a) (append (cdr a) b) )))
+(defun append3 (a b c) (append a (append b c)))
+(defun list>= (m list) (filter (lambda (n) (! (< n m))) list))
+(defun list< (m list) (filter (lambda (n) (< n m)) list))
+
+(defun qsort (l) (
+    if (= null l)
+        null
+        (append3
+            (qsort (list< (car l) (cdr l)))
+            (cons (car l) null)
+            (qsort (list>= (car l) (cdr l))))))
+
+(qsort '(6 8 1 0 6 8 2))
+
+; -------------
+
+(defun insert (i l) (
+    if (= null l)
+        (cons i l)
+        (if (> i (car l))
+            (cons (car l) (insert i (cdr l)))
+            (cons i l))))
+
+(defun insertsort (l) (
+    if (= null l)
+        null
+        (insert (car l) (insertsort (cdr l)))))
+
+(insertsort '(6 8 1 0 6 8 2))
+\end{minted}
+
+\par The second algorithm is faster than the first one, even though the first one has lower computational complexity. This is related to the code size (the first implementation is being parsed for much longer than the first one) and the complexity (insertion sort works well for small vectors).

@@ -1,0 +1,112 @@
+
+\section{The error table}
+
+\par The following table lists all of the possible error messages that may be displayed by MalbolgeLISP during the evaluation of a given LISP expression:
+
+\begin{longtable}{ | p{6em} | p{34em} | }
+\hline
+\textbf{Error code} & \textbf{Description}                                                                                                                           \\ \hline
+\verb|E000|          & Invalid amount of arguments passed to \verb|if|.                                                                                               \\ \hline
+\verb|E001|          & Invalid amount of arguments passed to \verb|quote| (usually used as \verb|'|).                                                                 \\ \hline
+\verb|E002|          & Invalid amount of arguments passed to \verb|def|, or the first argument isn't a string atom.                                                   \\ \hline
+\verb|E003|          & Invalid amount of arguments passed to \verb|lambda|, or the first argument isn't a list.                                                       \\ \hline
+\verb|E004|          & Invalid amount of arguments passed to \verb|defun|, or the first argument isn't a string atom, or the second argument isn't a list.            \\ \hline
+\verb|E005|          & Invalid amount of arguments passed to \verb|defmacro|, or the first argument isn't a string atom, or the second argument isn't a list.         \\ \hline
+\verb|E006|          & \verb|bind| and \verb|bind'| require at least two additional arguments - the function to bind to, and at least one argument to apply.          \\ \hline
+\verb|E007|          & \verb|atop| requires at least two additional arguments - at least two functions are required for composition.                                  \\ \hline
+\verb|E008|          & \verb|monad| and \verb|dyad| require only one additional argument - the code block in which \verb|x| or \verb|x| and \verb|y| should be bound. \\ \hline
+\verb|E009|          & Invalid amount of arguments passed to an user-defined closure or function.                                                                     \\ \hline
+\verb|E010|          & The arithmetic operations require exactly two additional arguments.                                                                            \\ \hline
+\verb|E011|          & The arithmetic operations can work only on numbers, but an atom of different type was supplied.                                                \\ \hline
+\verb|E012|          & Invalid amount of arguments passed to \verb|=| - only two atoms can be compared. Use \verb|uniq| and \verb|size| to check the equality of more atoms at a time. \\ \hline
+\verb|E013|          & Invalid amount of arguments passed to \verb|/=| - only two atoms can be compared.                                                              \\ \hline
+\verb|E014|          & Invalid amount of arguments passed to \verb|~|.                                                                                                \\ \hline
+\verb|E015|          & The only argument passed to \verb|~| isn't numeric.                                                                                            \\ \hline
+\verb|E016|          & Invalid amount of arguments passed to \verb|!|.                                                                                                \\ \hline
+\verb|E017|          & The only argument passed to \verb|!| isn't numeric.                                                                                            \\ \hline
+\verb|E018|          & Invalid amount of arguments passed to \verb|+'| or \verb|-'|.                                                                                  \\ \hline
+\verb|E019|          & The arguments passed to \verb|+'| or \verb|-'| aren't numeric.                                                                                 \\ \hline
+\verb|E020|          & Invalid invocation of \verb|car| or \verb|cdr| (expected a single extra list argument)                                                         \\ \hline
+\verb|E021|          & Invalid amount of arguments passed to \verb|cons|.                                                                                             \\ \hline
+\verb|E022|          & Invalid right argument passed to \verb|cons| (expected a list, pairs are unsupported).                                                         \\ \hline
+\verb|E023|          & Invalid amount of arguments passed to \verb|atom|.                                                                                             \\ \hline
+\verb|E024|          & Invalid amount of arguments passed to \verb|print|.                                                                                            \\ \hline
+\verb|E025|          & Invalid type of argument passed to \verb|cond| (expects lists).                                                                                \\ \hline
+\verb|E026|          & Non-exhaustive \verb|cond|.                                                                                                                    \\ \hline
+\verb|E027|          & Invalid invocation of \verb|let| (expected two lists).                                                                                         \\ \hline
+\verb|E028|          & No \verb|let| bindings or an unbalanced binding exists.                                                                                        \\ \hline
+\verb|E029|          & Invalid amount of arguments passed to \verb|iota|.                                                                                             \\ \hline
+\verb|E030|          & Invalid type of argument passed to \verb|iota| (expected number).                                                                              \\ \hline
+\verb|E031|          & Invalid amount of arguments passed to \verb|size|.                                                                                             \\ \hline
+\verb|E032|          & The only argument passed to \verb|size| isn't a list.                                                                                          \\ \hline
+\verb|E034|          & Invalid amount of arguments passed to \verb|nth|.                                                                                              \\ \hline
+\verb|E035|          & Invalid argument types passed to \verb|nth| (expected a number and a list).                                                                    \\ \hline
+\verb|E036|          & Out of bounds access using \verb|nth|, \verb|#N| or \verb|$N|.                                                                                 \\ \hline
+\verb|E037|          & Invalid amount of arguments passed to \verb|flatmap| or \verb|map|.                                                                            \\ \hline
+\verb|E038|          & Invalid type of 2nd argument passed to \verb|flatmap| or \verb|map| (expected a list).                                                         \\ \hline
+\verb|E039|          & Invalid amount of arguments passed to \verb|filter|.                                                                                           \\ \hline
+\verb|E040|          & Invalid type of 2nd argument passed to \verb|filter| (expected a list).                                                                        \\ \hline
+\verb|E041|          & \verb|filter|'s functor returned an invalid type.                                                                                              \\ \hline
+\verb|E042|          & Invalid amount of arguments passed to \verb|eval|.                                                                                             \\ \hline
+\verb|E043|          & Invalid amount of arguments passed to \verb|append|.                                                                                           \\ \hline
+\verb|E044|          & Invalid amount of arguments passed to \verb|append'|.                                                                                          \\ \hline
+\verb|E045|          & Invalid type of arguments passed to \verb|append'| (expected a non-null list as the first argument and a list as the second argument).         \\ \hline
+\verb|E046|          & Invalid type of argument passed to the monadic overload of \verb|rev|.                                                                         \\ \hline
+\verb|E047|          & Invalid type of arguments passed to the dyadic overload of \verb|rev| (expected a number $N$ and a list $L$, where \verb|[(size L) > N]|).     \\ \hline
+\verb|E048|          & Unrecognised overload of \verb|rev|.                                                                                                           \\ \hline
+\verb|E049|          & Invalid amount of arguments passed to \verb|any| or \verb|every|.                                                                              \\ \hline
+\verb|E050|          & The second argument passed to \verb|any| or \verb|every| isn't a list.                                                                         \\ \hline
+\verb|E051|          & \verb|any|'s or \verb|every|'s functor returned an invalid type.                                                                               \\ \hline
+\verb|E052|          & Invalid type of argument passed to the monadic overload of \verb|sort|.                                                                        \\ \hline
+\verb|E053|          & Invalid type of element in a list passed to the monadic overload of \verb|sort| (monadic \verb|sort| can sort only numbers, due to lack of total ordering on other atoms). \\ \hline
+\verb|E054|          & Invalid type of 2nd argument passed to the dyadic overload of \verb|sort|.                                                                     \\ \hline
+\verb|E055|          & \verb|sort|'s functor returned an invalid type.                                                                                                \\ \hline
+\verb|E056|          & Unrecognised overload of \verb|sort|.                                                                                                          \\ \hline
+\verb|E057|          & Invalid amount of arguments passed to \verb|zip|.                                                                                              \\ \hline
+\verb|E058|          & Invalid type of arguments passed to \verb|zip| (expected two lists).                                                                           \\ \hline
+\verb|E059|          & Invalid amount of arguments passed to \verb|id|.                                                                                               \\ \hline
+\verb|E060|          & Invalid amount of arguments passed to \verb|flatten|.                                                                                          \\ \hline
+\verb|E061|          & Invalid type of argument passed to \verb|flatten| (expected a list).                                                                           \\ \hline
+\verb|E062|          & Invalid amount of arguments passed to \verb|tie| (expected at least two arguments; to create a single element list use \verb|cons|).           \\ \hline
+\verb|E063|          & Invalid amount of arguments passed to \verb|where|.                                                                                            \\ \hline
+\verb|E064|          & Invalid type of argument passed to \verb|where| (expected a list).                                                                             \\ \hline
+\verb|E065|          & Invalid type of element in a list passed to \verb|where| (expected a number).                                                                  \\ \hline
+\verb|E066|          & Invalid amount of arguments passed to \verb|iterateN| (expected at least three arguments).                                                     \\ \hline
+\verb|E067|          & Invalid type of amount of iterations specified in an invocation to \verb|iterateN| (expected a number).                                        \\ \hline
+\verb|E068|          & Invalid amount of arguments passed to \verb|iterate| (expected at least three arguments).                                                      \\ \hline
+\verb|E069|          & \verb|iterate|'s functor returned an invalid type (expected boolean).                                                                          \\ \hline
+\verb|E070|          & Invalid amount of arguments passed to \verb|fold| or \verb|fold'| (expected two arguments for \verb|fold'|, or three for \verb|fold| - the identity element). \\ \hline
+\verb|E071|          & Invalid type of the last argument passed to \verb|fold| or \verb|fold'| (expected a list).                                                     \\ \hline
+\verb|E072|          & Invalid amount of arguments passed to \verb|zipwith| (expected three arguments).                                                               \\ \hline
+\verb|E073|          & Last two arguments passed to \verb|zipwith| aren't lists.                                                                                      \\ \hline
+\verb|E074|          & Invalid amount of arguments passed to \verb|replicate| (expected two arguments).                                                               \\ \hline
+\verb|E075|          & The dyadic \verb|list list| overload to \verb|replicate| expects only numbers in the first list.                                               \\ \hline
+\verb|E076|, \verb|E077| & Invalid argument types passed to \verb|replicate| (expected \verb|list list|, \verb|number list|, or \verb|number number|).                 \\ \hline
+\verb|E078|          & Invalid amount of arguments passed to \verb|count| (expected two arguments).                                                                   \\ \hline
+\verb|E079|          & The second argument passed to \verb|count| was expected to be a list.                                                                          \\ \hline
+\verb|E080|          & \verb|count|'s functor returned an invalid type.                                                                                               \\ \hline
+\verb|E081|          & Invalid amount of arguments passed to \verb|take| or \verb|drop'| (expected two arguments).                                                    \\ \hline
+\verb|E082|          & Invalid type of arguments passed to \verb|take| or \verb|drop'| (expected \verb|number list|).                                                 \\ \hline
+\verb|E083|          & Invalid amount of arguments passed to \verb|drop| or \verb|take'| (expected two arguments).                                                    \\ \hline
+\verb|E084|          & Invalid type of arguments passed to \verb|drop| or \verb|take'| (expected \verb|number list|).                                                 \\ \hline
+\verb|E085|          & Invalid amount of arguments passed to \verb|intersperse| (expected two arguments).                                                             \\ \hline
+\verb|E086|          & The second argument passed to \verb|intersperse| was expected to be a list.                                                                    \\ \hline
+\verb|E087|          & Invalid amount of arguments passed to \verb|scan| or \verb|scan'| (expected two arguments for \verb|scan'|, or three for \verb|scan| - the identity element). \\ \hline
+\verb|E088|          & Invalid type of the last argument passed to \verb|scan| or \verb|scan'| (expected a list).                                                     \\ \hline
+\verb|E089|          & Invalid amount of arguments passed to \verb|selfie| (expected two arguments).                                                                  \\ \hline
+\verb|E090|          & Invalid amount of arguments passed to \verb|commute| (expected three arguments).                                                               \\ \hline
+\verb|E091|          & Invalid amount of arguments passed to \verb|uniq| (expected a single argument).                                                                \\ \hline
+\verb|E092|          & Invalid argument type passed to \verb|uniq| (expected a list).                                                                                 \\ \hline
+\verb|E093|          & Unrecognised built-in function.                                                                                                                \\ \hline
+\verb|E094|          & Invalid user-defined macro invocation (invalid amount of arguments supplied).                                                                  \\ \hline
+\verb|E095|          & Can't evaluate (attempted to evaluate a numeric list without quoting?)                                                                         \\ \hline
+\verb|E096|          & Invalid amount of arguments passed to \verb|fork| (expected at least two arguments).                                                           \\ \hline
+\verb|E097|          & Invalid amount of arguments passed to constant n-th (expected a single argument).                                                              \\ \hline
+\verb|E098|          & Invalid type of argument passed to constant n-th (expected a list).                                                                            \\ \hline
+\verb|E099|          & Invalid amount of arguments passed to \verb|lazy| (expected at least two arguments).                                                           \\ \hline
+\verb|E100|          & Invalid amount of arguments passed to \verb|lift| (expected two arguments).                                                                    \\ \hline
+\verb|E101|          & Invalid type of second argument passed to \verb|lift| (expected a list).                                                                       \\ \hline
+\verb|E102|          & Invalid amount of arguments passed to \verb|bruijn| (expected a single argument).                                                              \\ \hline
+\verb|E103|          & Invalid type of the argument passed to \verb|bruijn| (expected a number).                                                                      \\ \hline
+\verb|E104|          & Not enough lambda expressions in scope for \verb|bruijn| invocation.                                                                           \\ \hline
+\end{longtable}

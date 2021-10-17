@@ -1,0 +1,120 @@
+
+\chapter*{Appendix A - compression benchmark data}
+\addcontentsline{toc}{chapter}{Appendix A}
+
+\par To process the results of compression benchmarks (compute compression ratio, median and average speed of compression and decompression), the following program is used:
+
+\begin{verbatim}
+⍝ The data is expected to be supplied in an interleaving format
+⍝ between compression and decompression timings (s) as the argument ⍵.
+⍝ The vector of original and compressed size is supplied as the argument ⍺.
+ parse←{
+     ⍝ compute the compression ratio.
+     cr←÷/⍺
+     ⍝ uninterleave the data.
+     sh←2,⍨2÷⍨⍴⍵⋄d←sh⍴⍵
+     ⍝ average and median
+     avg←(+⌿÷≢)d
+     med←(2÷⍨1⊥⊢⌷⍨∘⊂⍋⌷⍨∘⊂∘⌈2÷⍨0 1+≢)¨↓⍉d
+     ⍝ display results
+     ⎕←∊'Compression ratio:    ' (⍕cr)
+     ⎕←∊'Avg pack/unpack time: ' (⍕avg)
+     ⎕←∊'Med pack/unpack time: ' (⍕med)
+ }
+\end{verbatim}
+
+\par Since some results are yielded by the \verb|time| UNIX utility in the \verb|mm:ss.uu| format, instead of the ready to use \verb|ss.uu| format, the following function automatically performs the conversion:
+
+\begin{verbatim}
+ fixmin←{
+     s←≠⊆⊢⋄d←' 's ⍵⋄cn←(⊃∘⌽⎕VFI)¨
+     ms←':'∘∊¨d⋄f←{60⊥↑cn':'s ⍵}¨
+     fM←f@(⍸ms)⋄fS←cn@(⍸~ms)⋄↑,/fS fM d
+ }
+\end{verbatim}
+
+\begin{verbatim}
+      339823649 15349140 parse fixmin ppmd5Data ⍝ PPMD -mx=5
+Compression ratio:    22.13958886
+Avg pack/unpack time: 10.7432 13.4947
+Med pack/unpack time: 10.796 13.345
+      339823649 6029994 parse fixmin ppmd9Data  ⍝ PPMD -mx=9
+Compression ratio:    56.35555342
+Avg pack/unpack time: 23.591 25.5343
+Med pack/unpack time: 23.5785 25.426
+      339823649 37005733 parse fixmin deflate5Data  ⍝ Deflate -mx=5
+Compression ratio:    9.183000077
+Avg pack/unpack time: 64.624 2.217
+Med pack/unpack time: 64.64 2.1185
+      339823649 35905627 parse fixmin deflate9Data  ⍝ Deflate -mx=9
+Compression ratio:    9.464356353
+Avg pack/unpack time: 443.03 2.4009
+Med pack/unpack time: 441.985 2.396
+      339823649 12281576 parse fixmin bzip25Data  ⍝ BZip2 -mx=5
+Compression ratio:    27.66938453
+Avg pack/unpack time: 4.0545 10.3362
+Med pack/unpack time: 3.972 10.251
+      339823649 12266587 parse fixmin bzip29Data  ⍝ BZip2 -mx=9
+Compression ratio:    27.70319478
+Avg pack/unpack time: 19.0515 9.8867
+Med pack/unpack time: 19.111 9.761
+      339823649 14622648 parse fixmin lzma5Data  ⍝ LZMA -mx=5
+Compression ratio:    23.23954245
+Avg pack/unpack time: 79.17 2.2699
+Med pack/unpack time: 79.275 2.1905
+      339823649 12067455 parse fixmin lzma9Data  ⍝ LZMA -mx=9
+Compression ratio:    28.1603411
+Avg pack/unpack time: 177.241 2.2187
+Med pack/unpack time: 177 2.145
+      339823649 37671991 parse gzip6Data  ⍝ gzip -6
+Compression ratio:    9.020591691
+Avg pack/unpack time: 12.2658 1.4981
+Med pack/unpack time: 12.2315 1.4975
+      339823649 37554328 parse gzip9Data  ⍝ gzip -9
+Compression ratio:    9.048854476
+Avg pack/unpack time: 14.9222 1.5072
+Med pack/unpack time: 14.8975 1.4805
+\end{verbatim}
+
+\begin{verbatim}
+PPMD -mx=5: 10.471 13.846 10.381 13.524 10.873 13.358
+            11.109 13.062 11.044 13.231 10.677 13.332
+            10.734 14.142 10.858 14.063 10.380 13.228
+            10.905 13.161
+PPMD -mx=9: 22.564 27.833 22.839 26.289 20.872 26.227
+            23.976 25.358 24.987 25.863 23.751 24.408
+            23.406 24.874 25.510 25.494 23.265 23.815
+            24.740 25.182
+Deflate -mx=5: 1:04.76 2.359 1:04.68 1.911 1:04.29 1.942
+               1:04.16 2.788 1:04.87 2.128 1:04.60 2.700
+               1:04.78 2.038 1:04.37 1.962 1:04.30 2.109
+               1:05.43 2.233
+Deflate -mx=9: 7:20.82 2.547 7:20.39 2.934 7:21.92 2.714
+               7:22.05 2.797 7:29.80 1.969 7:21.01 2.366
+               7:24.64 2.310 7:25.06 1.996 7:23.13 2.426
+               7:21.48 1.950
+BZip2 -mx=5: 5.145 10.322 4.296 10.578 4.113 11.341
+             4.156 10.180 4.155 9.944 3.707 10.636
+             3.733 10.425 3.685 9.950 3.831 10.140
+             3.724 9.846
+BZip2 -mx=9: 18.444 10.030 19.329 9.848 19.300 10.159
+             18.855 11.023 18.933 10.286 19.252 9.582
+             19.372 9.397 18.808 9.674 18.989 9.293
+             19.233 9.575
+LZMA -mx=5: 1:20.08 2.036 1:19.11 2.038 1:19.51 2.080
+            1:19.11 2.152 1:19.58 2.781 1:17.84 2.229
+            1:20.13 2.412 1:18.90 2.401 1:18.00 2.425
+            1:19.44 2.145
+LZMA -mx=9: 3:00.12 2.118 2:56.99 2.040 2:55.21 2.041
+            2:57.16 2.221 2:56.97 2.063 2:57.01 2.172
+            2:59.83 2.556 2:54.96 2.604 2:55.01 2.118
+            2:59.15 2.254
+GZip -6: 12.729 1.502 12.355 1.515 12.316 1.501
+         12.048 1.489 12.230 1.490 12.220 1.487
+         12.076 1.494 12.357 1.507 12.233 1.493
+         12.094 1.503
+GZip -9: 15.001 1.491 14.908 1.518 15.195 1.472
+         15.109 1.480 14.704 1.710 14.706 1.477
+         14.887 1.477 14.861 1.478 14.974 1.481
+         14.877 1.488
+\end{verbatim}

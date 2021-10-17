@@ -1,0 +1,61 @@
+
+\documentclass{doc}
+
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{longtable}
+\usepackage{amsmath, amssymb}
+\usepackage{pmboxdraw}
+\usepackage{graphicx}
+\usepackage{bigfoot}
+\usepackage{minted}
+\usepackage[bottom]{footmisc}
+\graphicspath{ {.} }
+\usepackage{alltt,xcolor}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{fancyvrb}
+
+\usepackage{fontspec}
+\setmonofont{[Apl385.ttf]}[Scale=MatchLowercase]
+\newfontfamily\cjkfont{Noto Sans CJK SC}
+
+\makeatletter
+\AtBeginEnvironment{minted}{\dontdofcolorbox}
+\def\dontdofcolorbox{\renewcommand\fcolorbox[4][]{##4}}
+\makeatother
+
+\interfootnotelinepenalty=10000
+
+\docAuthor{Kamila Szewczyk}
+
+\title{MalbolgeLISP}
+
+\docDesc{Design and implementation of the most complex Malbolge Unshackled program to date}
+
+\date{Fall 2020 - Fall 2021}
+
+\begin{document}
+
+\maketitle
+
+\include{preamble/abstract}
+\include{preamble/foreword}
+
+\tableofcontents
+
+\newgeometry{left=10mm,right=10mm,top=20mm,bottom=20mm}
+
+\include{preamble/glossary}
+
+\include{content/chapter1}
+\include{content/chapter2}
+\include{content/chapter3}
+
+\include{content/summary}
+
+\include{appendix/a}
+\include{appendix/b}
+\include{appendix/c}
+
+\end{document}

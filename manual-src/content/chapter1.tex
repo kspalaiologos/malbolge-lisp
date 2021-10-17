@@ -1,0 +1,698 @@
+
+\chapter{Malbolge and Malbolge Unshackled}
+
+\par Malbolge, invented by Ben Olmstead in 1998, is an esoteric programming language designed to be as difficult to program in as possible. A few key characteristics of it follow:
+
+\begin{itemize}
+    \item A virtual machine based on the ternary system.
+    \item Von Neumann architecture - code and data aren't separated from each other.
+    \item Memory is in a deterministic state, yet it isn't zeroed. Instead, it's filled with a sequence produced as a derivative of \textit{crazy operation}.
+    \item Each machine word is 10 trits wide (fixed and relatively small rotation width; small amount of addressable memory - less than 65K).
+    \item Each register and memory cell holds a single machine word.
+    \item Only three registers: \begin{itemize}
+        \item \verb|A| - accumulator
+        \item \verb|C| - \textit{code} (instruction) pointer
+        \item \verb|D| - data pointer
+    \end{itemize}
+    \item Eight basic operations.
+    \item The opcode executed depends on its position in the file and encrypted after being executed (thus, provoking the thought of instruction cycles - what if on some position, a certain instruction produces a looping cycle that might have a purpose?).
+    \item The instruction set includes a jump instruction, a halt instruction, I/O routines, no-operation (which is used almost exclusively in NOP sleds), pointer dereference and two operations on data.
+    \item The data can only be modified via tritwise rotation (single trit at a time) or an unintuitive\footnote{according to Esolangs wiki, \url{https://esolangs.org/wiki/Malbolge}} \textit{crazy} operation.
+    \item Early toy programs made in Malbolge\footnote{\url{https://esolangs.org/wiki/Malbolge_programming}} \footnote{\url{http://www.lscheffer.com/malbolge.shtml}} were made either via bruteforce (first \textit{"Hello, world"} program) or inefficient tooling. Some programs were made by hand, like the following \verb|cat| program that doesn't terminate\footnote{\url{https://esolangs.org/wiki/Malbolge#Cat}}:
+    \begin{verbatim}
+(=BA#9"=<;:3y7x54-21q/p-,+*)"!h%B0/.
+~P<<:(8&66#"!~}|{zyxwvugJ%
+    \end{verbatim}
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|l|}
+\hline
+opcode & normalised         & operation                    \\ \hline
+4      & \verb|i|           & \verb|C = *D|                \\ \hline
+5      & \verb|<|           & \verb|putchar(A % 256)|      \\ \hline
+23     & \verb|/|           & \verb|A = getchar()|         \\ \hline
+39     & \verb|*|           & \verb|A = *D = rot_r(*D)|    \\ \hline
+40     & \verb|j|           & \verb|D = *D|                \\ \hline
+62     & \verb|p|           & \verb|A = *D = crzop(A, *D)| \\ \hline
+68     & \verb|o|           & \verb|/* no-operation */|    \\ \hline
+81     & \verb|v|           & \verb|exit(0)|               \\ \hline
+\end{tabular}
+\caption{Malbolge's 8 basic operations}
+\end{table}
+
+\begin{table}
+\centering
+\begin{tabular}{|ll|lll|}
+\hline
+                      &            & \multicolumn{1}{c}{}            & \verb|A|                         &            \\
+                      &            & \multicolumn{1}{l|}{\textbf{0}} & \multicolumn{1}{l|}{\textbf{1}} & \textbf{2} \\ \hline
+\multicolumn{1}{|c}{} & \textbf{0} & \multicolumn{1}{l|}{1}          & \multicolumn{1}{l|}{0}          & 0          \\ \cline{2-5} 
+\verb|[D]|               & \textbf{1} & \multicolumn{1}{l|}{1}          & \multicolumn{1}{l|}{0}          & 2          \\ \cline{2-5} 
+                      & \textbf{2} & \multicolumn{1}{l|}{2}          & \multicolumn{1}{l|}{2}          & 1          \\ \hline
+\end{tabular}
+\caption{Malbolge's crazy operation executed on single trits.}
+\end{table}
+
+\par Since Malbolge can address only $3^{10}$ memory cells, it's definitely \textbf{not} Turing-complete. Neither are extensions to it, like \textit{Malbolge20}\footnote{\url{https://www.trs.css.i.nagoya-u.ac.jp/projects/Malbolge/}}, since the addressable memory is still bounded. MalbolgeLISP is a Malbolge Unshackled program (which doesn't depend on a fixed rotation width, but using a rotwidth loop, it makes sure that the rotation width is wide enough).
+
+\par To outline the most important differences between Malbolge Unshackled and Malbolge:
+
+\begin{itemize}
+    \item The rotation width is chosen randomly by the interpreter.
+    \item Malbolge Unshackled lets the width of rotation be variable, which grows with the values in the D register, and since the initial rotation width is unknown, one would have to probe it (otherwise \verb|*| returns unpredictable results).
+    \item Malbolge Unshackled's print instruction takes unicode codepoints.
+    \item If the rotation width is unknown, it's theoretically impossible to load values larger than $3^4-1$, except values starting with a \verb|1| trit.
+\end{itemize}
+
+\section{Striving for a fast interpreter}
+
+\par MalbolgeLISP is available for download on my website\footnote{\url{https://kamila.akagi.moe/malbolgelisp-v1.2/}}, or from the GitHub repository\footnote{\url{https://github.com/kspalaiologos/malbolge-lisp}}. It's bundled with a performant Malbolge Unshackled interpreter with a fixed rotation width of 19 trits, confusingly called \textit{fast20}. MalbolgeLISP v1.1 used to be bundled with a different version of fast20, which is currently obsolete because of its unsatisfactory performance and excessive resource consumption. It could be argued that fast20 is not a valid Malbolge Unshackled interpreter (the rotation behavior diverges from the Malbolge Unshackled specification), yet MalbolgeLISP is still theoretically usable on a dynamic rotation width interpreter. Such an interpreter has not been provided, since they tend to be very slow, and no extended tests have been made - because of the internal tooling structure however, MalbolgeLISP still manages to achieve 100\% coverage.
+
+\par The idea of fixing the rotation width was already employed in the past, although all implementations picked the rotation width 20. The rotation width of 19 trits is marginally faster at an insignificant cost, hence it's used in fast20.
+
+\subsection{Data representation}
+
+\par Ørjan Johansen\footnote{\url{http://oerjan.nvg.org/esoteric/Unshackled.hs}} uses the following data structures in his Malbolge Unshackled interpreter:
+
+\begin{minted}{Haskell}
+-- The memory structure, a combined trie and linked list
+data MemNode = MemNode {
+    nodes :: MemNodes, next :: MemNode,
+    value :: IORef Value, modClass :: Int, width :: Int}
+type MemNodes = Trit -> MemNode
+data Value = OffsetV Trit Integer | ListV [Trit] deriving (Show)
+data Trit = T0 | T1 | T2 deriving (Enum, Show, Eq)
+
+type UMonad = StateT UState IO
+data UState = UState {
+    other :: OtherState,
+    a :: Value,
+    c :: MemNode,
+    d :: MemNode }
+data OtherState = Other { -- Things that change rarely, if at all
+    memory :: MemNode,
+    rotWidth :: Int,
+    maxWidth :: Int,
+    growthPolicy :: Int -> UMonad OtherState }
+\end{minted}
+
+\par It is apparent that the memory isn't implemented in a particularly efficient manner (nodes form a list, machine word is a list). Rotation is implemented as a recursive operation and crazy operation is implemented as mapping of a trit-wise \verb|op| on each trit:
+
+\begin{minted}{Haskell}
+rotate width val = ListV $ compressList $ rot w t r where
+    w = if width >= 1 then width else bug "..."
+    ListV (t:r') = vToList val
+    r = case r' of
+        []  -> [t]
+        _   -> r'
+    rot 1 t r       = t : r
+    rot w t [l]     = l : rot (w-1) t [l]
+    rot w t (t':l)  = t' : rot (w-1) t l
+
+opValue v1 v2 = ListV $ compressList $ opv l1 l2 where
+    opv [t] l = map (t `op`) l
+    opv l [t] = map (`op` t) l
+    opv (t1:r1) (t2:r2) = (t1 `op` t2):opv r1 r2
+    opv _ _ = bug "..."
+    ListV l1 = vToList v1
+    ListV l2 = vToList v2
+
+op T0 T0 = T1;      op T1 T0 = T0;      op T2 T0 = T0
+op T0 T1 = T1;      op T1 T1 = T0;      op T2 T1 = T2
+op T0 T2 = T2;      op T1 T2 = T2;      op T2 T2 = T1
+\end{minted}
+
+\par A model with superior performance characteristics would involve fixing the rotation width to some value, thus making the memory a contiguous vector, making rotation and crazy operation $O(1)$. This model has been employed in early versions fast20 (derived from Matthias Lutter's public domain code\footnote{\url{https://lutter.cc/unshackled/Unshackled-20.c}}).
+
+\begin{minted}{C}
+typedef struct Word {
+    #ifndef MEMORY
+        unsigned int area;
+        unsigned int high;
+        unsigned int low;
+    #else
+        unsigned char area;
+        unsigned short high;
+        unsigned short low;
+    #endif
+} Word;
+
+static inline uint16_t crazy_low(uint16_t a, uint16_t d) {
+    const uint16_t crz[] = { 1, 0, 0, 1, 0, 2, 2, 2, 1 };
+    uint16_t result = 0; uint16_t k = 1;
+    for(char pos = 0; pos < 10; pos++) {
+        result += k * crz[(a % 3) + 3 * (d % 3)];
+        a /= 3; d /= 3; k *= 3;
+    }
+    return result;
+}
+
+static inline Word zero() {
+    Word result = {0, 0, 0};
+    return result;
+}
+
+static inline Word increment(Word d) {
+    d.low++;
+    if (d.low >= 59049) {
+        d.low = 0;
+        d.high++;
+    }
+    return d;
+}
+
+static inline Word decrement(Word d) {
+    if (d.low == 0) {
+        d.low = 59048;
+        d.high--;
+    } else
+        d.low--;
+    return d;
+}
+
+static inline Word crazy(Word a, Word d) {
+    Word output;
+    unsigned int crz[] = {1,0,0,1,0,2,2,2,1};
+    output.area = crz[a.area+3*d.area];
+    output.high = crazy_low(a.high, d.high);
+    output.low = crazy_low(a.low, d.low);
+    return output;
+}
+
+static inline Word rotate_r(Word d) {
+    unsigned int carry_h = d.high % 3;
+    unsigned int carry_l = d.low % 3;
+    d.high = 19683 * carry_l + ((unsigned int) d.high) / 3;
+    d.low = 19683 * carry_h + ((unsigned int) d.low) / 3;
+    return d;
+}
+\end{minted}
+
+\par The memory management scheme of this interpreter is also unsatisfactory. A single memory cell takes three \verb|unsigned int|s worth of memory (on the testing machine used while developing fast20, \verb|sizeof(unsigned int) == 4|), which is almost three times less memory efficient as it could be (since $2^{32} > 3^{20}$).
+
+\par Since the \verb|high| and \verb|low| fields store 10 trits, they can be turned into \verb|unsigned short|s. The \verb|area| field stores a single trit, so it can be made an \verb|unsigned char|. This is what happens when \verb|MEMORY| is defined, but in this case, unaligned accesses worsen the performance of the program (25s vs 30s for \verb|(! 6)|), which is still not satisfactory, since MalbolgeLISP v1.2's interpreter takes only 8s to execute this expression (12s if instead of \verb|unsigned int| memory cells, \verb|unsigned long| memory cells are forced), meaning that it's more efficient than old fast20 in any configuration.
+
+\par The most effective memory management scheme for a Malbolge Unshackled interpreter of fixed rotation width considered so far involves treating memory cells as unsigned 32-bit integers, without distinction between the higher or lower bits.
+
+\begin{minted}{C}
+#define u8         uint8_t
+#define u32        uint32_t
+#define C          const
+#define P          static
+#define _(a...)    {return({a;});}
+#define F_(n,a...) for(int i=0;i<n;i++){a;}
+#define INLINE P inline __attribute__((always_inline))
+
+typedef u32 W;
+#define SZ 19
+#define END 1162261467ULL
+
+P C u8 crz[] = {
+    1,0,0,9,
+    1,0,2,9,
+    2,2,1
+}, crz2[] = {
+    4,3,3,1,0,0,1,0,0,9,9,9,9,9,9,9,
+    4,3,5,1,0,2,1,0,2,9,9,9,9,9,9,9,
+    5,5,4,2,2,1,2,2,1,9,9,9,9,9,9,9,
+    4,3,3,1,0,0,7,6,6,9,9,9,9,9,9,9,
+    4,3,5,1,0,2,7,6,8,9,9,9,9,9,9,9,
+    5,5,4,2,2,1,8,8,7,9,9,9,9,9,9,9,
+    7,6,6,7,6,6,4,3,3,9,9,9,9,9,9,9,
+    7,6,8,7,6,8,4,3,5,9,9,9,9,9,9,9,
+    8,8,7,8,8,7,5,5,4,9,9,9,9,9,9,9
+};
+
+#define UNR_CRZ(trans,sf1,sf2)W am=a%sf1,ad=a/sf1,dm=d%sf1,dd=d/sf1; \
+    r+=k*trans[am+sf2*dm];a=ad;d=dd;k*=sf1;
+INLINE W mcrz(W a, W d)_(W r=0,k=1;F_(SZ/2,UNR_CRZ(crz2,9,16))
+    if(SZ&1){UNR_CRZ(crz,3,4)}r;)
+INLINE W mrot(W x)_(W t=END/3,b=x%t,m=b%3,d=b/3;d+m*(t/3)+(x-b))
+\end{minted}
+
+\par This implementation of the crazy operation and rotations is particularly efficient, as they are $O(1)$ operations that do not involve any expensive instructions such as \verb|DIV| due to the modular multiplicative inverse optimisation performed by most compilers\footnote{explained in more detail on \url{https://kamila.akagi.moe/posts/leap-gcd/}} (whereby division operations become multiplication operations as a result of the laws of modular arithmetic\footnote{\url{https://en.wikipedia.org/wiki/Modular_multiplicative_inverse}}). As the LUT is padded and the operation's loop is unrolled, the crazy operation becomes even faster. \verb|UNR_CRZ| takes the crazy operation LUT and scale factors for extraction. The following \verb|F_| loop is manually unrolled to use the larger \verb|crz2| table, and fixed up with an \verb|if(SZ&1){...}| clause which uses the smaller \verb|crz| table - the operation is a fix-up on a single trit\footnote{This model has been employed for the first time in \url{https://github.com/dzaima}'s interpreter}. When compiled with \verb|clang|\footnote{\verb|clang kiera-tests/fast20.c -O3 -mtune=native -march=native -fvisibility=hidden -o fast20|}, the \verb|mcrz| function's control flow is flattened\footnote{\url{https://paste.m.akagi.moe/~kamila/2382dfe7d51f0177b4abb89da385efad2e710e8c}}. No significant performance improvements were observed when the crazy operation was unrolled further via compiler pragmas or the LUT was enlarged.
+
+\subsection{Memory management}
+
+\par A vector is the best data structure for holding the Malbolge memory. It offers $O(1)$ random access and insertion or removal of elements at the end with an amortised constant complexity $O(1)$. However, employing a vector with traditional qualities is not an efficient solution, as resizing it may cause reallocations, and allocating $4 * 3^{19}$ bytes of memory upfront (approximately 4.6 GB) is wasteful and requires filling it with a pattern derived from the source code, which negatively affects startup performance. fast20 bundled with MalbolgeLISP v1.1 solves the problems with usual vectors in the following way:
+
+\begin{minted}{c}
+static unsigned int last_initialized;
+
+static inline Word* ptr_to(Word** mem[], Word d) {
+    if ((mem[d.area])[d.high]) {
+        return &(((mem[d.area])[d.high])[d.low]);
+    }
+    (mem[d.area])[d.high] = (Word*)malloc(59049 * sizeof(Word));
+    Word repitition[6];
+    repitition[(last_initialized-1) % 6] =
+            ((mem[0])[(last_initialized-1) / 59049])
+                [(last_initialized-1) % 59049];
+    repitition[(last_initialized) % 6] =
+            ((mem[0])[last_initialized / 59049])
+                [last_initialized % 59049];
+    #pragma GCC unroll 6
+    for (unsigned int i=0;i<6;i++) {
+        repitition[(last_initialized+1+i) % 6] =
+                crazy(repitition[(last_initialized+i) % 6],
+                    repitition[(last_initialized-1+i) % 6]);
+    }
+    unsigned int offset = (59049*((unsigned int)d.high)) % 6;
+    for(unsigned int i = 0; i < 59049; i++) {
+        ((mem[d.area])[d.high])[i] = repitition[(i+offset)%6];
+    }
+    return &(((mem[d.area])[d.high])[d.low]);
+}
+\end{minted}
+
+\par The \verb|ptr_to| routine is called in the following parts of the code for everything related to Malbolge memory access. It's far from ideal, since the code uses multiple pointer indirections and performs the allocation check each time a memory cell is requested (by checking just the high word; the code allocates $3^{10}$ worth of cells on each fault). Essentially, the code splits the Malbolge memory into chunks, so no reallocations are required. The relevant relative cycle estimation data obtained across \verb|callgrind| profiling sessions follows:
+
+\begin{itemize}
+    \item $14.80$ - instruction decode
+    \item $14.64$ - memory presence check + 5.92 - returning the reference (20.56 in total for \verb|ptr_to|)
+    \item $13.81$ - incrementing/decrementing Malbolge words (mainly caused by split between high/low)
+    \item $\pm5$ - cumulative for crazy operation
+\end{itemize}
+
+\par New fast20 takes advantage of virtual memory, anonymous mapping and catching access violation exceptions to solve the problem of reallocations and checks without splitting the memory into chunks, worsening the performance because of pointer indirections. The relevant code fragment follows.
+
+\begin{minted}{C}
+P u64 pgsiz;
+P W*mem,pat[6];
+
+P void mpstb(void*b,u64 l) {
+  mmap(b,l,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANON|MAP_FIXED,-1,0);
+}
+
+P void sigsegvh(int n,siginfo_t*si,void*_) {
+  void*a=si->si_addr,*ab=(void*)((u64)a&~(pgsiz-1));mpstb(ab, pgsiz);  
+  W* curr=ab;i64 off=(curr-mem)%(END/3);F1(pgsiz,sizeof(W),*curr++=pat[off++%6]);
+}
+
+P u64 rup(u64 v)_(((v-1)&~(pgsiz-1))+pgsiz)
+
+__attribute__((hot,flatten))int main(int argc, char* argv[]){
+  pgsiz=sysconf(_SC_PAGESIZE);
+  mem=mmap(NULL,END*sizeof(W),PROT_NONE,MAP_NORESERVE|MAP_PRIVATE|MAP_ANON,-1,0);
+  struct sigaction act;memset(&act,0,sizeof(struct sigaction));
+  act.sa_flags=SA_SIGINFO;act.sa_sigaction=sigsegvh;sigaction(SIGSEGV,&act,NULL);
+  FILE*f=fopen(argv[1],"rb");fseek(f,0,SEEK_END);u64 S=ftell(f);rewind(f);
+  u64 szR=rup(S),off=0;mpstb(mem, szR*sizeof(W));
+  /* [snip] */
+  INS_4:c=*d;NXT;
+  INS_5:putchar(a);fflush(stdout);NXT;
+  INS_23:;int CR=getchar();a=CR==EOF?END-1:CR;NXT;
+  INS_39:a=*d=mrot(*d);NXT;
+  INS_40:d=mem+*d;NXT;
+  INS_62:a=*d=mcrz(a, *d);
+  INS_68:NXT;
+  INS_81:return 0;
+  INS_DEF:NXT;
+}
+\end{minted}
+
+\par The interpreter maps the entire memory area as virtual memory and registers an access violation exception handler. This way, if a write happens to the memory which isn't marked as writable (first \verb|mmap| call sets \verb|PROT_NONE|), the handler maps this memory as writable and then fills it with the pattern. Due to performance concerns, the code marks the entire file size as writable using \verb|mpstb|. \verb|mpstb| only changes the \textbf{m}emory \textbf{p}rotection, but the \verb|mprotect| function was not employed to facilitate this, as it appears to exhibit inferior performance characteristics when called repetitively\footnote{The author suspects that it's caused by inter-processor interrupts causing TLB shootdowns.}.
+
+\par It has been observed that many instances of fast20 requesting memory from the kernel via \verb|mmap| behave poorly from within QEMU virtual machines running the latest Linux kernel available in Debian repositories (at the time of writing, 5.10.0). A single call may take up to 7 minutes and trigger the kernel timeout watchdog, displaying a soft lockup warning that declares a CPU as having been stuck for approximately 24 whole seconds. According to the \verb|perf| utility running on the virtual machine's host, the host kernel appears to be stuck in a spinlock. These negative performance characteristics are not the fault of a programming error in fast20, and these issues are not exhibited on the host operating system.
+
+\subsection{Code evaluation}
+
+\par The old fast20 implementation's performance problems are mainly caused by an inefficient data representation, although there are improvements to be made in the evaluation function.
+
+\begin{minted}{c}
+static inline unsigned char get_instruction(Word** mem[], Word c) {
+    Word* instr = ptr_to(mem, c);
+    unsigned int instruction = instr->low;
+    instruction =
+        (instruction+((unsigned int) c.low) + 59049 * ((unsigned int) c.high) +
+            (c.area == 1 ? 52 : (c.area == 2 ? 10 : 0))) % 94;
+    return instruction;
+}
+
+__attribute((flatten)) int main(int argc, char* argv[]) {
+    Word** memory[3];
+    int j;
+    #pragma GCC unroll 3
+    for (unsigned char i=0; i<3; i++) {
+        memory[i] = (Word**)malloc(59049 * sizeof(Word*));
+        for (j=0; j<59049; j++)
+            (memory[i])[j] = 0;
+    }
+    Word a, c, d;
+    FILE* file = fopen(argv[1],"rb");
+    fseek(file, 0, SEEK_END);
+    unsigned int size = ftell(file);
+    rewind(file);
+    a = zero();
+    c = zero();
+    d = zero();
+    while(1) {
+        if(__builtin_expect(size > 16, 1)) {
+            /* snip: loop unrolling */
+        } else {
+            Word* cell = ptr_toz(memory, d);
+            (*cell) = zero();
+            fread(&cell->low,1,1,file);
+            if (cell->low != ' ' && cell->low != '\r' && cell->low != '\n')
+                d = increment(d);
+            break;
+        }
+    }
+    fclose(file);
+    for(; d.low != 59048; d = increment(d)) {
+        *ptr_toz(memory, d) = crazy(*ptr_toz(memory, decrement(d)),
+                *ptr_toz(memory, decrement(decrement(d))));
+    }
+    last_initialized = 59047 + 59049*((unsigned int) d.high);
+    d = zero();
+
+    while (1) {
+        unsigned char instruction = get_instruction(memory, c);
+        switch (instruction){
+            case 4:
+                c = *ptr_to(memory,d);
+                break;
+            /* snip: I/O */
+            case 39:
+                a = (*ptr_to(memory,d)
+                        = rotate_r(*ptr_to(memory,d)));
+                break;
+            case 40:
+                d = *ptr_to(memory,d);
+                break;
+            case 62:
+                a = (*ptr_to(memory,d)
+                        = crazy(a, *ptr_to(memory,d)));
+                break;
+            case 81:
+                return 0;
+            default:
+                break;
+        }
+
+        Word* mem_c = ptr_to(memory, c);
+        mem_c->low = translation[mem_c->low - 33];
+
+        c = increment(c);
+        d = increment(d);
+    }
+}
+\end{minted}
+
+\par The new fast20 interpreter improves upon this design by making Malbolge's \verb|D| register an actual pointer, which offers significant improvements in performance. Representing the \verb|C| register as a pointer is, however, not viable - as the instructions are determined based on their position within the file, so the value of \verb|C| relative to the memory base would have to be computed upon each instruction decode. The translation is done via the padded version of the original \verb|xlat|\footnote{Ben Olmstead's terminology; the array might have been named after a x86 instruction.} array, as presented below:
+
+\begin{minted}{c}
+  W c=0,a=0,*d=mem;
+  P C int offs[]={
+    0,
+    ((i64)a1_off-(i64)(END/3))%94+94,
+    ((i64)a2_off-(i64)(2*(END/3))%94+94)
+  };
+  P C void*j[94];F_(94,j[i]=&&INS_DEF)
+  #define M(n) j[n]=&&INS_##n;
+  M(4)M(5)M(23)M(39)M(40)M(62)M(68)M(81)
+  #define BRA {goto*j[(c+mem[c]+offs[c/(END/3)])%94];}
+  BRA;
+  #define NXT mem[c] = \
+    "SOMEBODY MAKE ME FEEL ALIVE" \
+    "[hj9>,5z]&gqtyfr$(we4{WP)H-Zn,[%\\3dL+Q;>U!pJS72FhO" \
+    "A1CB6v^=I_0/8|jsb9m<.TVac`uY*MK'X~xDl}REokN:#?G\"i@" \
+    "AND SHATTER ME"[mem[c]];c++;d++;BRA
+  INS_4:c=*d;NXT;
+  INS_5:putchar(a);fflush(stdout);NXT;
+  INS_23:;int CR=getchar();a=CR==EOF?END-1:CR;NXT;
+  INS_39:a=*d=mrot(*d);NXT;
+  INS_40:d=mem+*d;NXT;
+  INS_62:a=*d=mcrz(a, *d);
+  INS_68:NXT;
+  INS_81:return 0;
+  INS_DEF:NXT;
+\end{minted}
+
+\subsection{Interpreter profiling results}
+
+\par The profiling results for new fast20 differ from the previous results, since many aspects of fast20 have been optimised and profiling now reveals actual bottlenecks in the current Malbolge interpreter implementation. The relative cycle estimation data follows.
+
+\begin{itemize}
+    \item 14.79 - crazy operation (in total).
+    \item 14.87 - executing \verb|JMP|.
+    \item 9.91 - executing \verb|CRZ| and \verb|NOP|.
+    \item 1.87 - executing \verb|ROTR| and \verb|MOVD|.
+\end{itemize}
+
+\section{Special properties of Malbolge}
+
+\par One can consider hypothetical Malbolge code that, in the general case, may self-modify significantly, or just slightly. It may have a number of recognisable idioms within it, but this is not required. By making no assumptions about the source code\footnote{... which isn't a wrong assumption to make, given how unusual Malbolge code must be to circumvent all the language's difficulties}, it is possible to ascertain some facts about it.
+
+\par As polymorphic code in Malbolge is a ubiquitous phenomenon, it is not possible to perform a static disassembly of a given Malbolge program. It is also impossible to determine the instruction cycles used by the program, and because Malbolge is a von Neumann machine, it is also impossible to separate self-modifying code from static (initialised) data.
+
+\par All of the issues presented here may be solved by making the assumption that the given code is executed from within a special interpreter. This hypothetical special interpreter would attempt to reconstruct a form of Malbolge assembly with a notion of initialised data, \verb|bss| data and instruction cycle specifications. The unfortunate fact of the matter is that, to fully reconstruct this code, it is required to satisfy all of its possible code paths. Due to the effects of self-modification and lack of separation between code and data, this may not even be feasible at all.
+
+\par Observation of the fast20 interpreter's code provokes an interesting thought - the Malbolge source code loaded into the Malbolge memory is a sequence of bytes (e.g. for MalbolgeLISP, around 300 MiB of data). The memory consists of double-words, thus producing 3 wasted bytes of space for each given Malbolge instruction; the problems caused by this become more visible as the size of the program increases\footnote{currently, because of this, MalbolgeLisp requires around 1.2GiB of memory, instead of around 400MB which would definitely be sufficient}. One potential solution to this problem may be to mark certain areas of memory as code - this would reduce their size, but for more pathological cases\footnote{Most Malbolge programs}, the performance would degrade significantly by the process of unpacking the code to allow for self-modification, as well as keeping data within the code area\footnote{1B$\rightarrow$1B representation gets turned back into 1B$\rightarrow$4B, forcing a memory move and complicating the memory map, greatly decreasing the performance of other functions that require access to the Malbolge memory, unless special cases for the access violation handler are added that make sure that the code pages are marked as read-only, and then unmarked and unpacked once a write is requested}. The packing process would also need to turn the Malbolge memory into a different data structure, as the requirement of each element within a vector being of equal size isn't satisfied.
+
+\par One optimisation technique that has been proven to work for many programming languages is known as idiom recognition, and it has been successfully applied to languages such as Brainfuck\footnote{\url{https://github.com/rdebath/Brainfuck/tree/master/tritium}}, as well as real-world compilers via peephole optimisation\footnote{\url{https://gcc.gnu.org/onlinedocs/gcc-5.2.0/gccint/Peephole-Definitions.html}} and strength reduction techniques. High-level languages where sequences of granular operations describe an operation on data that can be executed more efficiently can also benefit from this technique\footnote{\url{http://docs.dyalog.com/14.0/Dyalog\%20APL\%20Idioms.pdf}}.
+
+\par However, peephole optimisations cannot be guaranteed to be sound if the code is self-modifying, or if code and data are mixed. It is not exactly known to the optimisation tool what the code executes, as the given code may be anything. The optimisation tool may be forced to simply guess that something is a code instruction cycle - and even if this guess proves to be correct, the instruction cycles may be chained to perform more complex operations, which makes this entire procedure extremely non-deterministic, or even impossible to perform. In many cases the results would be unhelpful and redundant, and potentially even inefficient. Additionally, it is also not possible to utilise parallel processing to aid in the evaluation of Malbolge source code.
+
+\par The following subsections demonstrate example operations that could be optimised by an interpreter that manages to employ idiom recognition.
+
+\subsection{Malbolge constant load idiom}
+
+\par Loading immediate values in Malbolge is non-trivial (except 0, which can simply be loaded by rotating \verb|CON0| right). It requires loading a \verb|CON1| value and performing crazy operation on it once or three times (depending on whether or not the integer in trinary notation has any ones present - i.e. it is \textit{tricky}; only even digits in trinary representation allow a load consisting of a single crazy operation). The following load generator is proposed:
+
+\begin{verbatim}
+ to_opt←{
+     o←2|n←3⊥⍣¯1⊢⍵⋄s←∊⍕⍤0
+     z←s n⋄y←s ~o⋄x←s 2∘×o
+     ∨/o:x y z⋄⊂z
+ }
+\end{verbatim}
+
+\par If the integer's trinary representation $T$ is not \textit{tricky}, it is possible to load it via the following method (using Nagoya syntax\footnote{\url{https://www.trs.css.i.nagoya-u.ac.jp/projects/Malbolge/papers/IPSJ-SIGPRO-2014-1-6.pdf}}):
+
+\begin{verbatim}
+{
+ENTRY: ROT CON1 REV ROT
+       OPR $T REV OPR
+       HLT
+}
+\end{verbatim}
+
+\par As a result of the first line \verb|CON1| is loaded into \verb|A|. The second line puts $T$ into \verb|[D]|, putting \verb|crazyop(CON1, T)| into both. As all \verb|A| trits are 1, assuming the following mapping between corresponding pairs of trits: \verb|0 1 2| is turned into \verb|0 0 2| per the crazy operation lookup table (\verb|0| and \verb|2| match and \verb|1| doesn't match, which is this method produces correct results only for numbers that aren't \textit{tricky}), it was possible to load the immediate.
+
+\par For \textit{tricky} immediate values, a slightly different strategy is used. If there was a way to load a trinary number to A, so that it's \verb|CON1| which has a zero trit corresponding to every one trit in the desired result\footnote{e.g. to load \verb|12210t|, \verb|A = 1111101101t| to make the crazy operation presented above work}, the same technique could be used since according to the table, \verb|opr(0t, 1t) = 1t|.
+
+\par To load the mask, one should perform the crazy operation of a trinary number \verb|CON0| with a \verb|2| trit on every corresponding position where a \verb|1| trit in the mask is desired. Then, to obtain the final mask value, the \verb|1| trits from the initial number are picked and put on their corresponding positions to a \verb|CON0|-based number, and then the number is negated\footnote{0 trits become 1 trits, 1 trits become 0 trits}, and the two numbers obtained are used as parameters to crazy operation. For example, to load the number \verb|12210t|, the following sequence of operations would be required:
+
+\begin{verbatim}
+rot 1111111111t
+op of 1111111111t and 20020t       # 20020t
+op of 20020t and 1101t             # 1111101101t
+op of 1111101101t and 12210t       # 12210t
+\end{verbatim}
+
+\par Verifying the sequence with the generator ($156_{10} \Leftrightarrow 12210_3$):
+
+\begin{verbatim}
+      to_opt 156
+┌─────┬─────┬─────┐
+│20020│01101│12210│
+└─────┴─────┴─────┘
+\end{verbatim}
+
+\subsection{Malbolge flag idiom}
+
+\par Flags are made out of an arbitrary ($N \geq 1$) amount of \verb|NOP| instructions, followed by a \verb|MOVD| instruction in a single cycle, and then a \verb|JMP| instruction. Flags are set and unset by restoring and execution, and their behavior is probed by arranging the source code so that the \verb|MOVD| instruction affects the control flow in a meaningful way. Multistate flags ($N > 2$) can be used for storing multiple values. For example, a \verb|NOP/NOP/NOP/MOVD| chain can have the following states:
+
+\begin{itemize}
+    \item \verb|NOP/NOP/NOP/MOVD|
+    \item \verb|NOP/NOP/MOVD/NOP|
+    \item \verb|NOP/MOVD/NOP/NOP|
+    \item \verb|MOVD/NOP/NOP/NOP|
+\end{itemize}
+
+\par Although the multistate flag technique is rarely utilised within MalbolgeLISP, the entire codebase consists of around 14'000 \verb|NOP/MOVD| flags.
+
+\section{Handling Malbolge code}
+
+\par Malbolge code in its unprocessed form has extremely poor compressibility characteristics. The entropy statistics of the MalbolgeLISP source code\footnote{Exact size: \verb|339823649| bytes.} as provided by the \verb|ent| utility in the Debian Linux software repositories are as follows:
+
+\begin{verbatim}
+% ent lisp.mb
+Entropy = 6.554589 bits per byte.
+
+Optimum compression would reduce the size
+of this 339823649 byte file by 18 percent.
+
+Chi square distribution for 339823649 samples is 585653786.63, and randomly
+would exceed this value less than 0.01 percent of the times.
+
+Arithmetic mean value of data bytes is 79.5007 (127.5 = random).
+Monte Carlo value for Pi is 4.000000000 (error 27.32 percent).
+Serial correlation coefficient is 0.507535 (totally uncorrelated = 0.0).
+\end{verbatim}
+
+\par Despite the virtual machine only being capable of executing 6 distinct instructions, we see a demonstration of Malbolge code having an immensely high entropy. This can be explained primarily through the instruction encoding, as each instruction depends on its position within the file, and must be picked through the \verb|xlat| lookup table (or alternatively via an inline padded string as is demonstrated by fast20, removing the need to perform a subtraction operation; in fast20 this instruction translation process occurs within the \verb|NXT| macro). The Malbolge code is designed to mitigate this issue already, but it can also be \textit{normalised}\footnote{\url{https://web.archive.org/web/20170815102152/https://acooke.org/malbolge.html}} - during this process, instructions are to be decrypted to match the original specification\footnote{raw printable ASCII characters, without encoding}. The following code can be used to facilitate the conversion between Malbolge and its normalised form:
+
+\begin{minted}{c}
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
+
+const uint8_t * xlat1 = "+b(29e*j1VMEKLyC})8&m#~W>qxdRp0wkrUo[D7,X"
+    "TcA\"lI.v%{gJh4G\\-=O@5`_3i<?Z';FNQuY]szf$!BS/|t:Pn6^Ha";
+
+uint8_t assembly(uint8_t c) {
+    switch(c) {
+        case 'i': return 4;
+        case '<': return 5;
+        case '/': return 23;
+        case '*': return 39;
+        case 'j': return 40;
+        case 'p': return 62;
+        case 'o': return 68;
+        case 'v': return 81;
+    }
+
+    fprintf(stderr, "invalid character: %d (%c)\n", c, c);
+}
+
+uint8_t decodeInt(uint8_t code, uint64_t position) {
+    return xlat1[(((uint64_t) code) - 33ull + position) % 94];
+}
+
+void normalize(void) {
+    uint64_t t = 0; int8_t ct;
+    while((ct = getchar()) != EOF) {
+        if(ct > 32)
+            putchar(decodeInt(ct, t));
+        t++;
+    }
+}
+
+uint8_t encodeInt(uint64_t code, uint64_t position) {
+    int8_t t = (code - position % 94 + 94) % 94;
+    if(t < 33)
+        t += 94;
+    return t;
+}
+
+void assemble(void) {
+    uint64_t t = 0; int8_t ct;
+    while((ct = getchar()) != EOF) {
+        if(ct > 32)
+            putchar(encodeInt(assembly(ct), t));
+        t++;
+    }
+}
+
+int main(int argc, char * argv[]) {
+    if(argv[1][0] == 'e')
+        assemble();
+    else if(argv[1][0] == 'd')
+        normalize();
+}
+\end{minted}
+
+\par It should be noted that normalised storage of Malbolge code in-memory would not benefit the interpreter unless the interpreter's memory is transparently compressed by the kernel via modules such as \verb|zram|, as the added overhead of encode and decode operations would drastically worsen runtime performance characteristics. It is, however, apparent that this normalisation and compression process will improve the cost of transporting Malbolge programs between computers.
+
+\par The following results table presents the results of MalbolgeLISP compressed in its unmodified state with various popular compression algorithms:
+
+\begin{table}[H]
+\begin{tabular}{ll|l|l|l|l|}
+\cline{3-6}
+                                         &                            & \multicolumn{2}{l|}{\textbf{Compression time}} & \multicolumn{2}{l|}{\textbf{Decompression time}} \\ \cline{1-2}
+\multicolumn{1}{|l|}{\textbf{Algorithm}} & \textbf{Compression Ratio} & \textbf{Average}       & \textbf{Median}       & \textbf{Average}        & \textbf{Median}        \\ \hline
+\multicolumn{1}{|l|}{PPMd mx=5}         & 22.13958886                & 10.7432                & 10.796                & 13.4947                 & 13.345                 \\ \hline
+\multicolumn{1}{|l|}{PPMd mx=9}         & 56.35555342                & 23.591                 & 23.5785               & 25.5343                 & 25.426                 \\ \hline
+\multicolumn{1}{|l|}{Deflate mx=5}      & 9.183000077                & 64.624                 & 64.64                 & 2.217                   & 2.1185                 \\ \hline
+\multicolumn{1}{|l|}{Deflate mx=9}      & 9.464356353                & 443.03                 & 441.985               & 2.4009                  & 2.396                  \\ \hline
+\multicolumn{1}{|l|}{BZip2 mx=5}        & 27.66938453                & 4.0545                 & 3.972                 & 10.3362                 & 10.251                 \\ \hline
+\multicolumn{1}{|l|}{BZip2 mx=9}        & 27.70319478                & 19.0515                & 19.111                & 9.8867                  & 9.761                  \\ \hline
+\multicolumn{1}{|l|}{LZMA mx=5}         & 23.23954245                & 79.17                  & 79.275                & 2.2699                  & 2.1905                 \\ \hline
+\multicolumn{1}{|l|}{LZMA mx=9}         & 28.1603411                 & 177.241                & 177                   & 2.2187                  & 2.145                  \\ \hline
+\multicolumn{1}{|l|}{GZip -6}            & 9.020591691                & 12.2658                & 12.2315               & 1.4981                  & 1.4975                 \\ \hline
+\multicolumn{1}{|l|}{GZip -9}            & 9.048854476                & 14.9222                & 14.8975               & 1.5072                  & 1.4805                 \\ \hline
+\end{tabular}
+\caption{Compression benchmark results}
+\end{table}
+
+\par Upon normalisation of the MalbolgeLISP source code, the statistics provided by \verb|ent| indicate much more compressible entropy figures, suggesting that the aforementioned compression algorithms could perform significantly better on normalised Malbolge code:
+
+\begin{verbatim}
+% ent lisp-norm.mb
+Entropy = 1.894916 bits per byte.
+
+Optimum compression would reduce the size
+of this 339823649 byte file by 76 percent.
+
+Chi square distribution for 339823649 samples is 24918677952.04, and randomly
+would exceed this value less than 0.01 percent of the times.
+
+Arithmetic mean value of data bytes is 96.0930 (127.5 = random).
+Monte Carlo value for Pi is 4.000000000 (error 27.32 percent).
+Serial correlation coefficient is -0.179165 (totally uncorrelated = 0.0).
+\end{verbatim}
+
+\par In the previous compression tests, the best compression ratio figures were provided by the PPMd and LZMA algorithms at their maximum supported compression levels; consequently, only these two algorithms and levels will be tested on the normalised output:
+\begin{itemize}
+    \item PPMd improved in compression time from an average of 23.6 down to 4.26 seconds, producing a 4845 KiB archive with a compression ratio of 68.5, a clear advantage over the original of 56.4.
+    \item LZMA yielded little to no improvement in compression time from the control test, but produced a 7575 KiB archive with a massively improved compression ratio of 43.8, far above the control value of 28.2.
+\end{itemize}
+
+\section{Arithmetic in Malbolge}
+
+\par Every previous attempt at implementing arithmetic in Malbolge\footnote{\url{https://lutter.cc/malbolge/digital_root.mal}} the author is aware of was bounded. The slightly modified implementation of addition used in Nagoya toolchain follows:
+
+\begin{minted}[escapeinside=||]{c}
+  //|{\cjkfont 桁上げを考慮しない加算}|
+  // x = x + y
+  //|{\cjkfont yは破壊される}|
+  void sum(Block* block, Variable* x, Variable* y){
+    auto temp = get_temporary_variable(TYPE::INT);
+    block->reset_to_con1(temp);
+    block->rot(CON2)->opr(x)->opr(temp)->opr(temp)
+         ->rot(CON0)->opr(x)->rot(CON2)->opr(temp)
+         ->rot(CON2)->opr(y)->rot(CON2)->opr(y)
+         ->opr(x)->opr(y)->opr(temp)->opr(x);
+    release_temporary_variable(temp);
+  }
+
+  //y = (x + y)|{\cjkfont の}|carry
+  //x|{\cjkfont は破壊されない}|
+  void carry(Block* block, Variable* x, Variable* y){
+    auto temp = get_temporary_variable(TYPE::INT);
+    block->reset_to_con1(temp);
+    block->rot(CON2)->opr(x)->rot(CON2)->opr(x)->opr(temp)
+         ->opr(y)->opr(temp)->opr(y)->rot(CON0)->opr(y)->opr(y);
+    release_temporary_variable(temp);
+  }
+  
+  void add(Block* block, Variable* x, Variable* _y){
+    auto c = copy_to_temporary(block, _y);
+    auto inner_block = new Block();
+    auto c2 = get_temporary_variable(TYPE::INT);
+
+    //|{\cjkfont 最上位の桁上げを消すために使う変数}|
+    auto reset = get_const_variable(TYPE::INT, 2905653667);
+        // 2905653667 <=> 21111111111111111111t
+    copy(inner_block, c, c2);
+    carry(inner_block, x, c);
+    inner_block->rot(CON2)->opr(reset)->opr(c)
+               ->rot(CON2)->opr(c)->
+               ->rot(CON2)->opr(reset);
+    sum(inner_block, x, c2);
+    inner_block->rot(x)->rot(reset);
+    block->repeat(20, inner_block);
+  }
+\end{minted}
+
+\par It is clear (judging by the last line of \verb|add| in \verb|parse.yy|), that this routine will not operate correctly on values larger than 20 trits, as a truncation will occur. The language is claimed to target Malbolge20\footnote{\url{https://git.trs.css.i.nagoya-u.ac.jp/malbolge/highlevel}}, which explains the deliberate decision to perform arithmetic operations with a constant size, as it is faster than the alternate method involving a repetitive decrement of the source and increment of the destination.
+
+\par Due to a lack of research targeted towards Malbolge Unshackled, MalbolgeLISP is the first Malbolge program to perform the addition and subtraction of arbitrary precision numbers\footnote{available as primitives \verb|+'| and \verb|-'|; the rotation width problem is solved by embedding an extension loop pass into each iteration of the operation}, for as long as the code is executed within an interpreter that is compliant with the Malbolge Unshackled standard\footnote{fast20 isn't one, since it fixes the rotation width}. Since MalbolgeLISP uses a \verb|decrement| $\rightarrow$ \verb|increment| (or \verb|decrement|) $\rightarrow$ \verb|loop| implementation of arithmetic, meaning that \verb|(+ N M)| is faster than \verb|(+ M N)| if $N > M$\footnote{because addition's computational complexity in this case is $O(N)$ for the second argument}.
+
+\par MalbolgeLISP's default approach is to perform bounded (modular) arithmetic operations. This approach simplifies the management of the stack and heap - the stack grows downwards and the heap grows upwards, meaning the stack must be placed at a high memory location to fully utilise the pointer width\footnote{otherwise the heap could clash into the stack or vice versa without reaching the memory at the top}.
+
+\par It may be suggested that MalbolgeLISP could implement bounded addition via the Nagoya University approach, however, it negatively affects the Malbolge code size and proves difficult to integrate with the rest of the interpreter. The code would need to be adjusted to perform trinary computation\footnote{ensuring correct handling of overflows and uniform behavior between multiplication/division and subtraction/addition, since MalbolgeLISP doesn't implement multiplication and division using repeated addition or subtraction}, and the entire interpreter would need to switch from a maximum addressable memory region size of $2^{26} - 1$ to $3^N - 1$.

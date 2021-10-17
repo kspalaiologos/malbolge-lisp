@@ -1,0 +1,47 @@
+
+\chapter*{Appendix B - auxiliary code}
+\addcontentsline{toc}{chapter}{Appendix B}
+
+\par The lazy evaluation chapter's footnote 25 mentions a C++ implementation of suspended functions, which is outlined below.
+
+\begin{minted}{cpp}
+#include <functional>
+#define _(a...) {return({a;});}
+
+template<class T>
+class suspension {
+private:
+    T const & (*t)(suspension *);
+    mutable T m;
+    std::function<T()> f;
+    
+    T const & gM() _ ( m )
+    T const & sM() _ ( m = f(); t = [] (suspension * x) _ ( x->gM() ); m )
+public:
+    explicit suspension(std::function<T()> f)
+        : f(f), t([] (suspension * x) _ ( x->sM() )), m(T()) { }
+    T const & get() _ ( t(this) )
+};
+\end{minted}
+
+\par Since MalbolgeLISP doesn't have a type system, implementing some features present in functional languages might be unintuitive and the resulting code is brittle and unchecked. That being said, it's possible to implement some features like the Maybe monad\footnote{borrowed from Haskell, although it's present in other languages as an optional type; the implementation was suggested by Matt8898}:
+
+\begin{minted}{lisp}
+(defun Just (x) (tie 1 x))
+(defun Nothing (x) (tie 0 0))
+(defun unwrap (x) (if (= 0 (car x)) (off) (car (cdr x))))
+\end{minted}
+
+\par Unwrapping an empty optional turns off the interpreter. To demonstrate:
+
+\begin{verbatim}
+(Just 1)
+......|.......
+(1 1)
+(unwrap (Just 1))
+..........|.....................
+1
+(unwrap (Nothing))
+........|.... (*interpreter terminates*)
+\end{verbatim}
+
