@@ -75,7 +75,7 @@ A cat program that doesn't terminate on EOF:
 ```
 $ git clone https://github.com/kspalaiologos/malbolge-lisp
 $ cd malbolge-lisp
-$ unzip lisp.mb
+$ unzip lisp.zip
 $ clang -O3 -march=native fast20.c -o fast20
 $ cat init_module.mb core.mb > lisp.mb
 $ ./fast20 lisp.mb
