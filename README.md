@@ -1,6 +1,6 @@
 
 # MalbolgeLISP v1.2
-Made by Palaiologos, 2020 - 2021. Core (core.mb) to the public domain, the entire program is governed by the GNU GPLv3 license.
+Made by Iczelia, 2020 - 2021. Core (core.mb) to the public domain, the entire program is governed by the GNU GPLv3 license.
 
 ![Session gif](https://github.com/kspalaiologos/malbolge-lisp/raw/master/session.gif)
 
